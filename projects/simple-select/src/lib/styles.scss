@@ -2,10 +2,9 @@ $simple-select-gray:        #999999;
 $simple-select-light:       #ffffff;
 $simple-select-dark:        #77878b;
 
-$simple-select-green:       #8bcc65;
+$simple-select-color:       lighten(#ff813f, 10%);
 
 $simple-select-border-color:  lighten($simple-select-gray, 25%);
-$simple-select-light-color:   lighten($simple-select-green, 10%);
 
 $simple-select-dropdown-min-width: 4em;
 $simple-select-dropdown-min-height: 1.8em;
@@ -115,7 +114,7 @@ $simple-select-padding: 5px;
 
 .simple-highlighted-option {
   color: $simple-select-light;
-  background: $simple-select-light-color;
+  background: $simple-select-color;
 }
 
 .simple-option {

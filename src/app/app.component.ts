@@ -8,6 +8,5 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'ngx-simple-select';
 
-  countryID = null;
-  country = '';
+  countryID = 'AT';
 }
