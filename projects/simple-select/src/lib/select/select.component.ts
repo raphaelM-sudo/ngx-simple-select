@@ -171,8 +171,9 @@ export class SelectComponent implements OnInit, AfterViewInit, ControlValueAcces
   }
 
   catchKey(event: KeyboardEvent) {
+    const control = event.ctrlKey;
+    const alt = event.altKey;
     const key = event.key;
-    event.preventDefault();
 
     if (key) {
       switch (key) {
@@ -181,27 +182,35 @@ export class SelectComponent implements OnInit, AfterViewInit, ControlValueAcces
         this.pressedConfirm();
         break;
         case 'ArrowUp':
-        this.pressedArrowUp();
+        this.pressedArrowUp(alt);
         break;
         case 'ArrowDown':
-        this.pressedArrowDown();
+        this.pressedArrowDown(alt);
         break;
         case 'Escape':
         this.dropdown.nativeElement.blur();
         break;
         default:
-        this.pressedSomeButton(key);
+        this.pressedSomeButton(key, alt, control);
+        return;
       }
+
+      event.preventDefault();
     }
   }
 
-  pressedSomeButton(key: string) {
-    if (key.length === 1) {
+  pressedSomeButton(key: string, alt: boolean, control: boolean) {
+    if (key.length === 1 && !alt && !control) {
       this.search(key);
     }
   }
 
-  pressedArrowUp() {
+  pressedArrowUp(alt: boolean) {
+    if (alt) {
+      this.dropdown.nativeElement.blur();
+      return;
+    }
+
     if (this.highlightedIndex < 0) {
       this.highlightIndex(this.selectedIndex);
     }
@@ -211,7 +220,12 @@ export class SelectComponent implements OnInit, AfterViewInit, ControlValueAcces
     }
   }
 
-  pressedArrowDown() {
+  pressedArrowDown(alt: boolean) {
+    if (alt) {
+      this.dropdown.nativeElement.blur();
+      return;
+    }
+
     if (this.highlightedIndex < 0) {
       this.highlightIndex(this.selectedIndex);
     }
