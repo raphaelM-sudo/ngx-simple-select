@@ -1,0 +1,5 @@
+<div #option [ngClass]="{'simple-highlighted-option': shouldHighlight()}" class="simple-option" (focus)="startFunctionality()" (mouseenter)="startFunctionality()" (blur)="stopFunctionality()" (mouseleave)="stopFunctionality()">
+  <div [@scrollLeft]="{value: shouldScrollSideways() ? 'scrolled' : 'initial', params: {offset: overflowOffset}}">
+    <ng-content></ng-content>
+  </div>
+</div>

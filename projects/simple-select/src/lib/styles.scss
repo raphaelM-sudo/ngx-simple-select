@@ -1,0 +1,133 @@
+$simple-select-gray:        #999999;
+$simple-select-light:       #ffffff;
+$simple-select-dark:        #77878b;
+
+$simple-select-green:       #8bcc65;
+
+$simple-select-border-color:  lighten($simple-select-gray, 25%);
+$simple-select-light-color:   lighten($simple-select-green, 10%);
+
+$simple-select-dropdown-min-width: 4em;
+$simple-select-dropdown-min-height: 1.8em;
+$simple-select-border-width: 1px;
+$simple-select-arrow-width: 10px;
+$simple-select-padding: 5px;
+
+.simple-dropdown {
+  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  width: inherit;
+  height: 100%;
+  max-width: 100%;
+  display: inline-block;
+  cursor: default;
+
+  &:focus {
+    outline: 0;
+  }
+}
+
+.simple-placeholder-text {
+  color: $simple-select-dark;
+}
+
+.simple-select-bar {
+  height: 100%;
+  min-height: $simple-select-dropdown-min-height;
+  padding-left: $simple-select-padding;
+  padding-right: ($simple-select-arrow-width + (2 * $simple-select-padding));
+  border: $simple-select-border-width solid transparent;
+}
+
+.simple-select-box {
+  width: 100%;
+  min-height: $simple-select-dropdown-min-height;
+  height: inherit;
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.simple-select-box,
+.simple-option-list {
+  min-width: $simple-select-dropdown-min-width;
+  line-height: inherit;
+  vertical-align: middle;
+}
+
+.simple-select-box {
+  top: -$simple-select-border-width;
+}
+
+.simple-arrow-down {
+  position: absolute;
+  min-height: $simple-select-dropdown-min-height;
+  color: $simple-select-dark;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: $simple-select-padding;
+  padding-left: ($simple-select-padding - $simple-select-border-width);
+  padding-right: ($simple-select-padding + $simple-select-border-width);
+  width: $simple-select-arrow-width;
+  font-size: .8em;
+  background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 16 16' version='1.1'%3E%3Cg id='surface1'%3E%3Cpath style=' stroke:none;fill-rule:nonzero;fill:rgb(0%25,0%25,0%25);fill-opacity:0.7;' d='M 0 4 L 8 12 L 16 4 Z M 0 4 '/%3E%3C/g%3E%3C/svg%3E%0A");
+  background-size: $simple-select-arrow-width;
+  background-position: ($simple-select-padding - $simple-select-border-width) 50%;
+  background-repeat: no-repeat;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.simple-select-border {
+  border: $simple-select-border-width solid $simple-select-border-color;
+}
+
+.simple-options-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.simple-option-list {
+  position: relative;
+  height: 100%;
+  background: $simple-select-light;
+  z-index: 2147483647;
+  top: -$simple-select-border-width;
+  left: 0;
+  right: 0;
+  border: $simple-select-border-width solid $simple-select-border-color;
+  height: auto;
+  max-height: 12rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.simple-highlighted-option {
+  color: $simple-select-light;
+  background: $simple-select-light-color;
+}
+
+.simple-option {
+  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  padding-left: $simple-select-padding;
+  padding-right: $simple-select-padding;
+  overflow: hidden;
+
+  div {
+    width: auto;
+    white-space: nowrap;
+    overflow-x: visible;
+  }
+}
