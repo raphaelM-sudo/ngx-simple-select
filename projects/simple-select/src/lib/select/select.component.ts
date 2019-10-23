@@ -11,14 +11,16 @@ export const INPUT_TIMEOUT = 500;
 @Component({
   selector: 'simple-select',
   templateUrl: './select.component.html',
-  styleUrls: ['./../styles.scss'],
+  styleUrls: ['./select.component.scss'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectComponent),
       multi: true
     }
-  ]
+  ],
+  // tslint:disable-next-line: use-host-property-decorator
+  host: {class: 'simple-select'}
 })
 export class SelectComponent implements OnInit, AfterViewInit, ControlValueAccessor {
 
@@ -77,7 +79,7 @@ export class SelectComponent implements OnInit, AfterViewInit, ControlValueAcces
   propagateChange = (_: any) => {};
 
   startFunctionality() {
-    if (this.optionsArray) {
+    if (!this.disabled && this.optionsArray) {
       this.focus = true;
       this.scrolledOutside = false;
     }

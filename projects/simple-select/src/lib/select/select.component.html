@@ -1,4 +1,4 @@
-<div #dropdown class="simple-dropdown" tabindex="0" (focus)="startFunctionality()" (mouseenter)="mouseenter()" (mouseleave)="mouseleave()" (blur)="stopFunctionality()" (keydown)="catchKey($event)">
+<div #dropdown [ngClass]="{'simple-disabled': disabled}" class="simple-dropdown" tabindex="0" (focus)="startFunctionality()" (mouseenter)="mouseenter()" (mouseleave)="mouseleave()" (blur)="stopFunctionality()" (keydown)="catchKey($event)">
   <div [ngClass]="{'simple-select-border': showUI}" class="simple-select-bar" (click)="startFunctionality()">
     <div class="simple-select-box">
       <div *ngIf="!selected; else showSelected" class="simple-placeholder-text">{{placeholder}}</div>
@@ -6,7 +6,7 @@
         <div [innerHTML]="selected.html | noSanitize"></div>
       </ng-template>
     </div>
-    <span [hidden]="!showUI" class="simple-arrow-down"></span>
+    <div [hidden]="!showUI" class="simple-arrow-down"></div>
   </div>
   <div class="simple-options-wrapper">
     <div #optionList [hidden]="!showList" class="simple-option-list">

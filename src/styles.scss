@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext');
 
 $footer-height: 10em;
-$container-width: 40em;
+$container-width: 60%;
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -53,10 +53,10 @@ footer {
   margin: 0 auto;
   width: $container-width;
   height: 100%;
+  text-align: center;
 }
 
 .container-content {
-
   margin: 2.5em;
 
   * {

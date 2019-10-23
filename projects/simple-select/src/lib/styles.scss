@@ -6,8 +6,10 @@ $simple-select-color:       lighten(#ff813f, 10%);
 
 $simple-select-border-color:  lighten($simple-select-gray, 25%);
 
+$simple-select-disabled-color: lighten($simple-select-border-color, 10%);
+
 $simple-select-dropdown-min-width: 4em;
-$simple-select-dropdown-min-height: 1.8em;
+$simple-select-dropdown-min-height: 1em;
 $simple-select-border-width: 1px;
 $simple-select-arrow-width: 10px;
 $simple-select-padding: 5px;
@@ -15,10 +17,11 @@ $simple-select-padding: 5px;
 .simple-dropdown {
   font-family: Arial, Helvetica, sans-serif;
   position: relative;
+  display: block;
   width: inherit;
   height: 100%;
   max-width: 100%;
-  display: inline-block;
+  min-width: $simple-select-dropdown-min-width;
   cursor: default;
 
   &:focus {
@@ -36,16 +39,20 @@ $simple-select-padding: 5px;
   padding-left: $simple-select-padding;
   padding-right: ($simple-select-arrow-width + (2 * $simple-select-padding));
   border: $simple-select-border-width solid transparent;
+  box-sizing: border-box;
 }
 
 .simple-select-box {
+  height: 100%;
   width: 100%;
-  min-height: $simple-select-dropdown-min-height;
-  height: inherit;
   position: relative;
-  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
+
+  * {
+    position: relative;
+    top: -$simple-select-border-width;
+  }
 }
 
 .simple-select-box,
@@ -55,17 +62,12 @@ $simple-select-padding: 5px;
   vertical-align: middle;
 }
 
-.simple-select-box {
-  top: -$simple-select-border-width;
-}
-
 .simple-arrow-down {
   position: absolute;
-  min-height: $simple-select-dropdown-min-height;
   color: $simple-select-dark;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  right: $simple-select-border-width;
+  top: $simple-select-border-width;
+  bottom: $simple-select-border-width;
   padding: $simple-select-padding;
   padding-left: ($simple-select-padding - $simple-select-border-width);
   padding-right: ($simple-select-padding + $simple-select-border-width);
@@ -129,4 +131,10 @@ $simple-select-padding: 5px;
     white-space: nowrap;
     overflow-x: visible;
   }
+}
+
+.simple-disabled {
+  background-color: $simple-select-disabled-color;
+  opacity: .65;
+  user-select: none;
 }

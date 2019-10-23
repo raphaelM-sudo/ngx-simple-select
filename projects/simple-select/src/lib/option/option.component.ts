@@ -18,7 +18,7 @@ import { ControlValueAccessor } from '@angular/forms';
     ]),
   ],
   templateUrl: './option.component.html',
-  styleUrls: ['./../styles.scss']
+  styleUrls: ['./option.component.scss']
 })
 export class OptionComponent implements OnInit, ControlValueAccessor {
 
