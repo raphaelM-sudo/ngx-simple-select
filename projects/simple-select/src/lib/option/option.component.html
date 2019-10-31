@@ -1,5 +1,13 @@
-<div #option [ngClass]="{'simple-highlighted-option': shouldHighlight()}" class="simple-option" (focus)="startFunctionality()" (mouseenter)="startFunctionality()" (blur)="stopFunctionality()" (mouseleave)="stopFunctionality()">
-  <div [@scrollLeft]="{value: shouldScrollSideways() ? 'scrolled' : 'initial', params: {offset: overflowOffset}}">
-    <ng-content></ng-content>
+<div [ngClass]="{'simple-option-rtl': direction === Direction.RightToLeft, 'simple-option-ltr': direction === Direction.LeftToRight}" (click)="select()">
+  <div class="simple-option-top"></div>
+  <div #optionField [ngClass]="{'simple-highlighted-option': highlighted}" class="simple-option-container">
+    <div [@scroll]="{value: shouldScrollSideways() ? 'scrolled' : 'initial', params: {offset: overflowOffset}}">
+      <div class="simple-option-start"></div>
+      <div #content class="simple-option-content">
+        <ng-content></ng-content>
+      </div>
+      <div class="simple-option-end"></div>
+    </div>
   </div>
+  <div class="simple-option-bottom"></div>
 </div>

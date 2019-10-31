@@ -1,8 +1,11 @@
 .simple-select {
   width: 50%;
-  height: 2em;
-  line-height: 2em;
-  text-align: start;
+  height: 2rem;
+  line-height: 2rem;
+}
+
+.simple-select-number * {
+  text-align: center;
 }
 
 .flag-icon {

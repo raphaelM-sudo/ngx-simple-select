@@ -1,26 +1,29 @@
-$simple-select-gray:        #999999;
-$simple-select-light:       #ffffff;
-$simple-select-dark:        #77878b;
+$simple-select-gray:          #999999 !default;
+$simple-select-background:    #ffffff !default;
+$simple-select-dark:          #555555 !default;
 
-$simple-select-color:       lighten(#ff813f, 10%);
+$simple-select-color:           #1e90ff !default;
 
-$simple-select-border-color:  lighten($simple-select-gray, 25%);
+$simple-select-border-color:    lighten($simple-select-gray, 25%) !default;
 
-$simple-select-disabled-color: lighten($simple-select-border-color, 10%);
+$simple-select-disabled-color:  lighten($simple-select-border-color, 10%) !default;
 
-$simple-select-dropdown-min-width: 4em;
-$simple-select-dropdown-min-height: 1em;
-$simple-select-border-width: 1px;
-$simple-select-arrow-width: 10px;
-$simple-select-padding: 5px;
+$simple-select-dropdown-min-width: 4em !default;
+$simple-select-dropdown-min-height: 1em !default;
+$simple-select-border-width: 1px !default;
+$simple-select-arrow-width: 8px !default;
+$simple-select-padding: 4px !default;
+$simple-select-max-list-height: 12em !default;
+
+.simple-select {
+  display: inline-block;
+  text-align: left;
+}
 
 .simple-dropdown {
-  font-family: Arial, Helvetica, sans-serif;
   position: relative;
-  display: block;
-  width: inherit;
+  width: 100%;
   height: 100%;
-  max-width: 100%;
   min-width: $simple-select-dropdown-min-width;
   cursor: default;
 
@@ -36,8 +39,6 @@ $simple-select-padding: 5px;
 .simple-select-bar {
   height: 100%;
   min-height: $simple-select-dropdown-min-height;
-  padding-left: $simple-select-padding;
-  padding-right: ($simple-select-arrow-width + (2 * $simple-select-padding));
   border: $simple-select-border-width solid transparent;
   box-sizing: border-box;
 }
@@ -48,6 +49,7 @@ $simple-select-padding: 5px;
   position: relative;
   white-space: nowrap;
   overflow: hidden;
+  user-select: none;
 
   * {
     position: relative;
@@ -57,7 +59,6 @@ $simple-select-padding: 5px;
 
 .simple-select-box,
 .simple-option-list {
-  min-width: $simple-select-dropdown-min-width;
   line-height: inherit;
   vertical-align: middle;
 }
@@ -65,72 +66,193 @@ $simple-select-padding: 5px;
 .simple-arrow-down {
   position: absolute;
   color: $simple-select-dark;
-  right: $simple-select-border-width;
   top: $simple-select-border-width;
   bottom: $simple-select-border-width;
   padding: $simple-select-padding;
-  padding-left: ($simple-select-padding - $simple-select-border-width);
-  padding-right: ($simple-select-padding + $simple-select-border-width);
   width: $simple-select-arrow-width;
-  font-size: .8em;
   background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 16 16' version='1.1'%3E%3Cg id='surface1'%3E%3Cpath style=' stroke:none;fill-rule:nonzero;fill:rgb(0%25,0%25,0%25);fill-opacity:0.7;' d='M 0 4 L 8 12 L 16 4 Z M 0 4 '/%3E%3C/g%3E%3C/svg%3E%0A");
   background-size: $simple-select-arrow-width;
-  background-position: ($simple-select-padding - $simple-select-border-width) 50%;
   background-repeat: no-repeat;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
+
   user-select: none;
+}
+
+.simple-select-ltr,
+.simple-option-ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+.simple-select-rtl,
+.simple-option-rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.simple-select-bar {
+  padding-left: $simple-select-padding;
+  padding-right: ($simple-select-arrow-width + (2 * $simple-select-padding));
+}
+
+.simple-arrow-down {
+  left: auto;
+  right: $simple-select-border-width;
+  padding-left: ($simple-select-padding - $simple-select-border-width);
+  padding-right: ($simple-select-padding + $simple-select-border-width);
+
+  background-position: ($simple-select-padding - $simple-select-border-width) 50%;
+  transform-origin: calc(50% - #{$simple-select-border-width})  50%;
+}
+
+.simple-select-rtl {
+
+  .simple-select-bar {
+    padding-left: ($simple-select-arrow-width + (2 * $simple-select-padding));
+    padding-right: $simple-select-padding;
+  }
+
+  .simple-arrow-down {
+    right: auto;
+    left: $simple-select-border-width;
+    padding-left: ($simple-select-padding + $simple-select-border-width);
+    padding-right: ($simple-select-padding - $simple-select-border-width);
+
+    background-position: ($simple-select-padding + $simple-select-border-width) 50%;
+    transform-origin: calc(50% + #{$simple-select-border-width})  50%;
+  }
 }
 
 .simple-select-border {
   border: $simple-select-border-width solid $simple-select-border-color;
 }
 
-.simple-options-wrapper {
-  position: absolute;
-  left: 0;
-  right: 0;
+.simple-options-container {
+  position: relative;
+
+  * {
+    z-index: 2147483647;
+  }
 }
 
-.simple-option-list {
-  position: relative;
-  height: 100%;
-  background: $simple-select-light;
-  z-index: 2147483647;
-  top: -$simple-select-border-width;
-  left: 0;
-  right: 0;
-  border: $simple-select-border-width solid $simple-select-border-color;
-  height: auto;
-  max-height: 12rem;
-  overflow-x: hidden;
-  overflow-y: auto;
+.simple-option-container .simple-option-content {
+  padding-left: $simple-select-padding;
+  padding-right: $simple-select-padding;
+}
 
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+.simple-select-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.simple-select-inactive {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.simple-select-mobile-tablet {
+  .simple-select-inactive {
+    transition: opacity .15s ease-out .1s, visibility .15s ease-out .1s;
+  }
+}
+
+.simple-select-default {
+
+  .simple-options-wrapper {
+    position: absolute;
+
+    top: -$simple-select-border-width;
+    left: 0;
+    right: 0;
+    margin: 0;
+
+    border: $simple-select-border-width solid $simple-select-border-color;
+    background: $simple-select-background;
+
+    > .simple-option-list {
+      max-height: $simple-select-max-list-height;
+      overflow-x: hidden;
+      overflow-y: auto;
+      user-select: none;
+    }
+  }
+
+  .simple-option-container {
+    position: relative;
+    overflow: hidden;
+
+    div {
+      width: auto;
+      white-space: nowrap;
+      overflow-x: visible;
+    }
+  }
+}
+
+.simple-select-mobile-tablet {
+
+  .simple-options-wrapper {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+
+    transform: scale(1.5);
+
+    > .simple-option-list {
+      position: absolute;
+      margin: 0;
+      top: 48%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 20%;
+      max-width: 85vh;
+      max-height: 52%;
+      background: $simple-select-background;
+      overflow-x: hidden;
+      overflow-y: auto;
+      user-select: none;
+      border-radius: 3px;
+    }
+  }
+
+  .simple-option:not(:first-child) {
+    .simple-option-top {
+      border-top: $simple-select-border-width solid $simple-select-border-color;
+    }
+  }
+
+  .simple-option {
+    .simple-option-top,
+    .simple-option-bottom {
+      margin-top: 2px;
+      margin-bottom: 2px;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+
+    .simple-option-container {
+      position: relative;
+      overflow-y: hidden;
+
+      div {
+        width: auto;
+        white-space: normal;
+        word-break: break-word;
+        overflow: hidden;
+      }
+    }
+  }
+}
+
+.simple-option-list > :not(.simple-option) {
+  padding: $simple-select-padding;
 }
 
 .simple-highlighted-option {
-  color: $simple-select-light;
+  color: $simple-select-background;
   background: $simple-select-color;
-}
-
-.simple-option {
-  font-family: Arial, Helvetica, sans-serif;
-  position: relative;
-  padding-left: $simple-select-padding;
-  padding-right: $simple-select-padding;
-  overflow: hidden;
-
-  div {
-    width: auto;
-    white-space: nowrap;
-    overflow-x: visible;
-  }
 }
 
 .simple-disabled {

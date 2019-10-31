@@ -1,11 +1,16 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+
+import { DeviceService } from '../device.service';
+import { Direction } from '../direction.enum';
+import { ParentService } from '../parent.service';
+import { SelectComponent } from '../select/select.component';
 
 @Component({
   selector: 'simple-option',
   animations: [
-    trigger('scrollLeft', [
+    trigger('scroll', [
       state('initial', style({
         transform: 'translateX(0)'
       })),
@@ -18,17 +23,22 @@ import { ControlValueAccessor } from '@angular/forms';
     ]),
   ],
   templateUrl: './option.component.html',
-  styleUrls: ['./option.component.scss']
+  styleUrls: ['./option.component.scss'],
+  // tslint:disable-next-line: use-host-property-decorator
+  host: {class: 'simple-option'}
 })
-export class OptionComponent implements OnInit, ControlValueAccessor {
+export class OptionComponent implements OnDestroy, ControlValueAccessor {
 
   @Input() label?: string;
-  @Input() selected = false;
   @Input() value: string | number = null;
   @Input() ngValue: object = null;
   @Input() disabled = false;
+  @Input() dir?: 'ltr' | 'rtl' | 'auto';
 
-  @ViewChild('option') option: ElementRef;
+  @ViewChild('optionField') optionField: ElementRef;
+  @ViewChild('content') content: ElementRef;
+
+  Direction = Direction;
 
   get val(): object | string | number {
     if (this.ngValue) {
@@ -40,11 +50,11 @@ export class OptionComponent implements OnInit, ControlValueAccessor {
 
   get text(): string {
 
-    const childNodes = this.option.nativeElement.childNodes;
+    const contentChildNodes = this.content.nativeElement.childNodes;
 
-    if (childNodes.length > 0) {
+    if (contentChildNodes.length > 0) {
 
-      const optionNodes = childNodes[0].childNodes;
+      const optionNodes = contentChildNodes.childNodes;
 
       if (optionNodes) {
 
@@ -60,33 +70,73 @@ export class OptionComponent implements OnInit, ControlValueAccessor {
       }
     }
 
-    return this.option.nativeElement.textContent as string;
+    return this.content.nativeElement.textContent as string;
   }
 
   get html(): string {
 
-    const childNodes = this.option.nativeElement.childNodes;
-
-    if (childNodes.length > 0) {
-      return childNodes[0].innerHTML as string;
+    if (this.content) {
+      return this.content.nativeElement.innerHTML as string;
     }
 
     return '';
   }
 
+  get direction(): Direction {
+
+    if (!this.dir && this.parent.component.dir) {
+      this.dir = this.parent.component.dir;
+    }
+
+    if (this.dir) {
+
+      switch (this.dir) {
+        case 'rtl':
+        return Direction.RightToLeft;
+        case 'auto':
+        return this.isRTL() ? Direction.RightToLeft : Direction.LeftToRight;
+        default:
+        return Direction.LeftToRight;
+      }
+    }
+
+    return Direction.Default;
+  }
+
+  index: number;
+  selected = false;
   hovered = false;
-  highlight = false;
+  highlighted = false;
   overflowOffset = 0;
   scrollSideways = false;
-  hasListener = false;
+
+  unlisteners: (() => void)[] = [];
+
+  isRTL() {
+    const ltrChars = 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF'+'\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF';
+    const rtlChars = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
+
+    const rtlDirCheck = new RegExp('^[^' + ltrChars + ']*[' + rtlChars + ']');
+
+    return rtlDirCheck.test(this.text);
+  }
 
   shouldScrollSideways() {
-    return this.hovered && this.scrollSideways;
+    return this.highlighted && this.hovered && this.scrollSideways;
   }
 
   startFunctionality() {
-    this.hovered = true;
-    this.calculateScroll();
+    if (!this.parent.component.scrolling) {
+      this.hovered = true;
+
+      if (!this.highlighted) {
+        this.parent.component.highlightIndex(this.index);
+        this.parent.component.scrollClippedElement();
+        this.calculateScroll();
+      }
+    } else {
+      this.parent.component.scrolling = false;
+    }
   }
 
   stopFunctionality() {
@@ -96,11 +146,19 @@ export class OptionComponent implements OnInit, ControlValueAccessor {
   calculateScroll() {
     if (this.hovered) {
 
-      const element = this.option.nativeElement;
+      const element = this.optionField.nativeElement;
 
       if (element.scrollWidth > element.clientWidth) {
         this.scrollSideways = true;
-        this.overflowOffset = element.clientWidth - element.scrollWidth - 5;
+        this.overflowOffset = element.clientWidth - element.scrollWidth;
+
+        if (!this.device.mobileOrTablet) {
+          this.overflowOffset -= 5;
+        }
+
+        if (this.direction === Direction.RightToLeft) {
+          this.overflowOffset = -this.overflowOffset;
+        }
       } else {
         this.scrollSideways = false;
         this.overflowOffset = 0;
@@ -108,13 +166,40 @@ export class OptionComponent implements OnInit, ControlValueAccessor {
     }
   }
 
-  shouldHighlight() {
-    return this.highlight;
+  select() {
+    this.parent.component.selectIndex(this.index);
+    this.parent.component.dropdown.nativeElement.blur();
   }
 
-  constructor() { }
+  constructor(
+    private parent: ParentService<SelectComponent>,
+    private elementRef: ElementRef,
+    private device: DeviceService,
+    private renderer: Renderer2
+  ) {
 
-  ngOnInit() {
+    // Only add hover listeners for PCs
+    if (!this.device.mobileOrTablet) {
+
+      this.unlisteners.push(
+        // Using mousemove here, so that the hover functionality triggers after moving the mouse on an element after scroll
+        this.renderer.listen(this.elementRef.nativeElement, 'mousemove', () => {
+        this.startFunctionality();
+        })
+      );
+
+      this.unlisteners.push(
+        this.renderer.listen(this.elementRef.nativeElement, 'mouseleave', () => {
+          this.stopFunctionality();
+        })
+      );
+    }
+  }
+
+  ngOnDestroy() {
+    for (const unlisten of this.unlisteners) {
+      unlisten();
+    }
   }
 
   writeValue(value: any): void {
