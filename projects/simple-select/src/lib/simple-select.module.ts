@@ -3,10 +3,10 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { DeviceService } from './device.service';
-import { NoSanitizePipe } from './no-sanitize.pipe';
-import { OptionComponent } from './option/option.component';
-import { SelectComponent } from './select/select.component';
+import { OptionComponent } from './components/option/option.component';
+import { SelectComponent } from './components/select/select.component';
+import { NoSanitizePipe } from './pipes/no-sanitize.pipe';
+import { DeviceService } from './services/device/device.service';
 
 @NgModule({
   declarations: [SelectComponent, OptionComponent, NoSanitizePipe],

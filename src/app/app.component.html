@@ -257,7 +257,7 @@
   </div>
 
   <div class="container-content">
-    <simple-select placeholder="עברי" dir="auto">
+    <simple-select placeholder="עברי" dir="auto" hoverBorder="true" required>
       <simple-option value="1">מלפפון</simple-option>
       <simple-option value="2">כתום</simple-option>
       <simple-option value="3">תפוז</simple-option>
@@ -273,7 +273,7 @@
 
   <div class="container-content simple-select-number">
     <simple-select placeholder="Numbers">
-      <simple-option *ngFor="let x of [].constructor(100); let i = index" value="{{ i + 1 }}">{{ i + 1 }}</simple-option>
+      <simple-option *ngFor="let x of [].constructor(4); let i = index" value="{{ i + 1 }}">{{ i + 1 }}</simple-option>
     </simple-select>
   </div>
 

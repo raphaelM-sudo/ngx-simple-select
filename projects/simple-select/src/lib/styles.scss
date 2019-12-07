@@ -1,30 +1,35 @@
-$simple-select-gray:          #999999 !default;
-$simple-select-background:    #ffffff !default;
-$simple-select-dark:          #555555 !default;
+$simple-select-background-color:        #ffffff !default;
+$simple-select-list-color:              #ffffff !default;
+$simple-select-placeholder-color:       #555555 !default;
+$simple-select-highlight-color:         #1e90ff !default;
+$simple-select-border-color:            lighten(#999999, 25%) !default;
+$simple-select-disabled-color:          lighten($simple-select-border-color, 10%) !default;
 
-$simple-select-color:           #1e90ff !default;
+$simple-select-dropdown-min-width:      4em !default;
+$simple-select-dropdown-min-height:     1em !default;
+$simple-select-border-width:            1px !default;
+$simple-select-arrow-width:             8px !default;
+$simple-select-padding:                 4px !default;
+$simple-select-max-list-height:         12em !default;
+$simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 16 16' version='1.1'%3E%3Cg id='surface1'%3E%3Cpath style=' stroke:none;fill-rule:nonzero;fill:rgb(0%25,0%25,0%25);fill-opacity:0.7;' d='M 0 4 L 8 12 L 16 4 Z M 0 4 '/%3E%3C/g%3E%3C/svg%3E%0A");
 
-$simple-select-border-color:    lighten($simple-select-gray, 25%) !default;
-
-$simple-select-disabled-color:  lighten($simple-select-border-color, 10%) !default;
-
-$simple-select-dropdown-min-width: 4em !default;
-$simple-select-dropdown-min-height: 1em !default;
-$simple-select-border-width: 1px !default;
-$simple-select-arrow-width: 8px !default;
-$simple-select-padding: 4px !default;
-$simple-select-max-list-height: 12em !default;
-
-.simple-select {
-  display: inline-block;
-  text-align: left;
+:root {
+  --simple-select-background-color:     #{$simple-select-background-color};
+  --simple-select-list-color:           #{$simple-select-list-color};
+  --simple-select-placeholder-color:    #{$simple-select-placeholder-color};
+  --simple-select-highlight-color:      #{$simple-select-highlight-color};
+  --simple-select-border-color:         #{$simple-select-border-color};
+  --simple-select-disabled-color:       #{$simple-select-disabled-color};
 }
 
-.simple-dropdown {
+.simple-select {
   position: relative;
-  width: 100%;
-  height: 100%;
+  display: inline-block;
+  text-align: left;
+
+  vertical-align: middle;
   min-width: $simple-select-dropdown-min-width;
+
   cursor: default;
 
   &:focus {
@@ -33,14 +38,15 @@ $simple-select-max-list-height: 12em !default;
 }
 
 .simple-placeholder-text {
-  color: $simple-select-dark;
+  height: 100%;
+  color: var(--simple-select-placeholder-color);
 }
 
 .simple-select-bar {
   height: 100%;
   min-height: $simple-select-dropdown-min-height;
+  background: var(--simple-select-background-color);
   border: $simple-select-border-width solid transparent;
-  box-sizing: border-box;
 }
 
 .simple-select-box {
@@ -50,11 +56,6 @@ $simple-select-max-list-height: 12em !default;
   white-space: nowrap;
   overflow: hidden;
   user-select: none;
-
-  * {
-    position: relative;
-    top: -$simple-select-border-width;
-  }
 }
 
 .simple-select-box,
@@ -65,14 +66,18 @@ $simple-select-max-list-height: 12em !default;
 
 .simple-arrow-down {
   position: absolute;
-  color: $simple-select-dark;
+  color: var(--simple-select-placeholder-color);
   top: $simple-select-border-width;
-  bottom: $simple-select-border-width;
-  padding: $simple-select-padding;
+  bottom: -$simple-select-border-width;
   width: $simple-select-arrow-width;
-  background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 16 16' version='1.1'%3E%3Cg id='surface1'%3E%3Cpath style=' stroke:none;fill-rule:nonzero;fill:rgb(0%25,0%25,0%25);fill-opacity:0.7;' d='M 0 4 L 8 12 L 16 4 Z M 0 4 '/%3E%3C/g%3E%3C/svg%3E%0A");
+  background-image: $simple-select-arrow-image;
   background-size: $simple-select-arrow-width;
   background-repeat: no-repeat;
+
+  padding-left: $simple-select-padding;
+  padding-right: $simple-select-padding;
+
+  background-position: $simple-select-padding 50%;
 
   user-select: none;
 }
@@ -91,39 +96,33 @@ $simple-select-max-list-height: 12em !default;
 
 .simple-select-bar {
   padding-left: $simple-select-padding;
-  padding-right: ($simple-select-arrow-width + (2 * $simple-select-padding));
+  padding-right: #{$simple-select-arrow-width + 2 * $simple-select-padding};
 }
 
 .simple-arrow-down {
   left: auto;
   right: $simple-select-border-width;
-  padding-left: ($simple-select-padding - $simple-select-border-width);
-  padding-right: ($simple-select-padding + $simple-select-border-width);
 
-  background-position: ($simple-select-padding - $simple-select-border-width) 50%;
-  transform-origin: calc(50% - #{$simple-select-border-width})  50%;
+  transform-origin: calc(50% - #{$simple-select-border-width - $simple-select-border-width}) 50%;
 }
 
 .simple-select-rtl {
 
   .simple-select-bar {
-    padding-left: ($simple-select-arrow-width + (2 * $simple-select-padding));
+    padding-left: #{$simple-select-arrow-width + 2 * $simple-select-padding};
     padding-right: $simple-select-padding;
   }
 
   .simple-arrow-down {
     right: auto;
     left: $simple-select-border-width;
-    padding-left: ($simple-select-padding + $simple-select-border-width);
-    padding-right: ($simple-select-padding - $simple-select-border-width);
 
-    background-position: ($simple-select-padding + $simple-select-border-width) 50%;
-    transform-origin: calc(50% + #{$simple-select-border-width})  50%;
+    transform-origin: calc(50% + #{$simple-select-border-width - $simple-select-border-width}) 50%;
   }
 }
 
 .simple-select-border {
-  border: $simple-select-border-width solid $simple-select-border-color;
+  border: $simple-select-border-width solid var(--simple-select-border-color);
 }
 
 .simple-options-container {
@@ -139,91 +138,51 @@ $simple-select-max-list-height: 12em !default;
   padding-right: $simple-select-padding;
 }
 
-.simple-select-active {
-  opacity: 1;
-  visibility: visible;
-}
-
 .simple-select-inactive {
   opacity: 0;
   visibility: hidden;
 }
 
-.simple-select-mobile-tablet {
-  .simple-select-inactive {
-    transition: opacity .15s ease-out .1s, visibility .15s ease-out .1s;
+.simple-options-wrapper {
+  position: absolute;
+
+  top: -$simple-select-border-width;
+  left: 0;
+  right: 0;
+  margin: 0;
+
+  border: $simple-select-border-width solid var(--simple-select-border-color);
+  background: var(--simple-select-list-color);
+
+  > .simple-option-list {
+    max-height: $simple-select-max-list-height;
+    overflow-x: hidden;
+    overflow-y: auto;
+    user-select: none;
   }
 }
 
-.simple-select-default {
+.simple-option-container {
+  position: relative;
+  overflow: hidden;
 
-  .simple-options-wrapper {
-    position: absolute;
-
-    top: -$simple-select-border-width;
-    left: 0;
-    right: 0;
-    margin: 0;
-
-    border: $simple-select-border-width solid $simple-select-border-color;
-    background: $simple-select-background;
-
-    > .simple-option-list {
-      max-height: $simple-select-max-list-height;
-      overflow-x: hidden;
-      overflow-y: auto;
-      user-select: none;
-    }
-  }
-
-  .simple-option-container {
-    position: relative;
-    overflow: hidden;
-
-    div {
-      width: auto;
-      white-space: nowrap;
-      overflow-x: visible;
-    }
+  div {
+    width: auto;
+    white-space: nowrap;
+    overflow-x: visible;
   }
 }
 
 .simple-select-mobile-tablet {
-
-  .simple-options-wrapper {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, .5);
-
-    transform: scale(1.5);
-
-    > .simple-option-list {
-      position: absolute;
-      margin: 0;
-      top: 48%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      min-width: 20%;
-      max-width: 85vh;
-      max-height: 52%;
-      background: $simple-select-background;
-      overflow-x: hidden;
-      overflow-y: auto;
-      user-select: none;
-      border-radius: 3px;
-    }
-  }
 
   .simple-option:not(:first-child) {
     .simple-option-top {
-      border-top: $simple-select-border-width solid $simple-select-border-color;
+      border-top: $simple-select-border-width solid var(--simple-select-border-color);
     }
   }
 
   .simple-option {
+
     .simple-option-top,
     .simple-option-bottom {
       margin-top: 2px;
@@ -239,7 +198,7 @@ $simple-select-max-list-height: 12em !default;
       div {
         width: auto;
         white-space: normal;
-        word-break: break-word;
+        word-wrap: normal;
         overflow: hidden;
       }
     }
@@ -251,12 +210,12 @@ $simple-select-max-list-height: 12em !default;
 }
 
 .simple-highlighted-option {
-  color: $simple-select-background;
-  background: $simple-select-color;
+  color: var(--simple-select-list-color);
+  background: var(--simple-select-highlight-color);
 }
 
 .simple-disabled {
-  background-color: $simple-select-disabled-color;
+  background-color: var(--simple-select-disabled-color);
   opacity: .65;
   user-select: none;
 }

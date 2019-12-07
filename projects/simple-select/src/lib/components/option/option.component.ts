@@ -1,14 +1,22 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, ElementRef, Input, OnDestroy, Renderer2, ViewChild } from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { Subject } from 'rxjs';
 
-import { DeviceService } from '../device.service';
-import { Direction } from '../direction.enum';
-import { ParentService } from '../parent.service';
-import { SelectComponent } from '../select/select.component';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import {
+    ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, InjectionToken,
+    Input, ViewChild, ViewEncapsulation
+} from '@angular/core';
+
+import { IDirectionElement } from '../../models/direction-element.model';
+import { Direction } from '../../models/direction.enum';
+import { IScrollableElement } from '../../models/scrollable-element.model';
+
+export const DIRECTION_ELEMENT = new InjectionToken<IDirectionElement>('OPTION_PARENT_COMPONENT');
+
+let nextUniqueId = 0;
 
 @Component({
   selector: 'simple-option',
+  exportAs: 'simpleOption',
   animations: [
     trigger('scroll', [
       state('initial', style({
@@ -23,11 +31,24 @@ import { SelectComponent } from '../select/select.component';
     ]),
   ],
   templateUrl: './option.component.html',
-  styleUrls: ['./option.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   // tslint:disable-next-line: use-host-property-decorator
-  host: {class: 'simple-option'}
+  host: {
+    class: 'simple-option',
+    role: 'option',
+    '[attr.id]': 'id',
+    '[attr.aria-selected]': 'selected.toString()',
+    '[attr.aria-disabled]': 'disabled.toString()',
+    '[class.simple-disabled]': 'disabled',
+    '[class.simple-option-rtl]': 'direction === Direction.RightToLeft',
+    '[class.simple-option-ltr]': 'direction === Direction.LeftToRight',
+    '(click)': 'select.next()',
+    '(mouseleave)': 'stopFunctionality()',
+    '(mousemove)': 'startFunctionality()'
+  }
 })
-export class OptionComponent implements OnDestroy, ControlValueAccessor {
+export class OptionComponent implements IScrollableElement {
 
   @Input() label?: string;
   @Input() value: string | number = null;
@@ -35,8 +56,17 @@ export class OptionComponent implements OnDestroy, ControlValueAccessor {
   @Input() disabled = false;
   @Input() dir?: 'ltr' | 'rtl' | 'auto';
 
-  @ViewChild('optionField') optionField: ElementRef;
-  @ViewChild('content') content: ElementRef;
+  @Input()
+  get id(): string { return this._id; }
+  set id(value: string) {
+    this._id = value || this.uid;
+  }
+
+  @ViewChild('optionField', { static: true }) element: ElementRef;
+  @ViewChild('content', { static: true }) content: ElementRef;
+
+  highlight: Subject<void> = new Subject<void>();
+  select: Subject<void> = new Subject<void>();
 
   Direction = Direction;
 
@@ -84,8 +114,8 @@ export class OptionComponent implements OnDestroy, ControlValueAccessor {
 
   get direction(): Direction {
 
-    if (!this.dir && this.parent.component.dir) {
-      this.dir = this.parent.component.dir;
+    if (!this.dir && this.parentDirection.dir) {
+      this.dir = this.parentDirection.dir;
     }
 
     if (this.dir) {
@@ -103,17 +133,28 @@ export class OptionComponent implements OnDestroy, ControlValueAccessor {
     return Direction.Default;
   }
 
-  index: number;
+  get highlighted(): boolean {
+    return this._highlighted;
+  }
+
+  set highlighted(highlighted: boolean) {
+    this._highlighted = highlighted;
+    this.cdRef.detectChanges();
+  }
+
+  // tslint:disable: variable-name
+  private _id: string;
+  private _highlighted = false;
+
+  private uid = `simple-option-${++nextUniqueId}`;
+
   selected = false;
   hovered = false;
-  highlighted = false;
   overflowOffset = 0;
   scrollSideways = false;
 
-  unlisteners: (() => void)[] = [];
-
   isRTL() {
-    const ltrChars = 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF'+'\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF';
+    const ltrChars = 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF' + '\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF';
     const rtlChars = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
 
     const rtlDirCheck = new RegExp('^[^' + ltrChars + ']*[' + rtlChars + ']');
@@ -126,16 +167,11 @@ export class OptionComponent implements OnDestroy, ControlValueAccessor {
   }
 
   startFunctionality() {
-    if (!this.parent.component.scrolling) {
-      this.hovered = true;
+    this.hovered = true;
 
-      if (!this.highlighted) {
-        this.parent.component.highlightIndex(this.index);
-        this.parent.component.scrollClippedElement();
-        this.calculateScroll();
-      }
-    } else {
-      this.parent.component.scrolling = false;
+    if (!this.highlighted) {
+      this.highlight.next();
+      this.calculateScroll();
     }
   }
 
@@ -146,15 +182,13 @@ export class OptionComponent implements OnDestroy, ControlValueAccessor {
   calculateScroll() {
     if (this.hovered) {
 
-      const element = this.optionField.nativeElement;
+      const element = this.element.nativeElement;
 
       if (element.scrollWidth > element.clientWidth) {
         this.scrollSideways = true;
         this.overflowOffset = element.clientWidth - element.scrollWidth;
 
-        if (!this.device.mobileOrTablet) {
-          this.overflowOffset -= 5;
-        }
+        this.overflowOffset -= 5;
 
         if (this.direction === Direction.RightToLeft) {
           this.overflowOffset = -this.overflowOffset;
@@ -166,52 +200,8 @@ export class OptionComponent implements OnDestroy, ControlValueAccessor {
     }
   }
 
-  select() {
-    this.parent.component.selectIndex(this.index);
-    this.parent.component.dropdown.nativeElement.blur();
-  }
-
-  constructor(
-    private parent: ParentService<SelectComponent>,
-    private elementRef: ElementRef,
-    private device: DeviceService,
-    private renderer: Renderer2
-  ) {
-
-    // Only add hover listeners for PCs
-    if (!this.device.mobileOrTablet) {
-
-      this.unlisteners.push(
-        // Using mousemove here, so that the hover functionality triggers after moving the mouse on an element after scroll
-        this.renderer.listen(this.elementRef.nativeElement, 'mousemove', () => {
-        this.startFunctionality();
-        })
-      );
-
-      this.unlisteners.push(
-        this.renderer.listen(this.elementRef.nativeElement, 'mouseleave', () => {
-          this.stopFunctionality();
-        })
-      );
-    }
-  }
-
-  ngOnDestroy() {
-    for (const unlisten of this.unlisteners) {
-      unlisten();
-    }
-  }
-
-  writeValue(value: any): void {
-
-  }
-
-  registerOnChange(fn: () => void): void {
-
-  }
-
-  registerOnTouched(fn: () => void): void { }
-  setDisabledState?(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+  constructor(private cdRef: ChangeDetectorRef, @Inject(DIRECTION_ELEMENT) private parentDirection: IDirectionElement) {
+    // Force setter to be called in case id was not specified.
+    this.id = this.id;
   }
 }
