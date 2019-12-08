@@ -11,7 +11,9 @@
   <div class="simple-options-container">
     <div [ngClass]="{'simple-select-inactive': !showList}" class="simple-options-wrapper" (click)="elementRef.nativeElement.blur()">
       <div #optionList class="simple-option-list">
-        <ng-content></ng-content>
+        <ng-container simpleRendered *ngIf="showList" (renderComplete)="scrollManager.scrollElementTop()">
+          <ng-content></ng-content>
+        </ng-container>
       </div>
     </div>
   </div>

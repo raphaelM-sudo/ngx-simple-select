@@ -7,9 +7,10 @@ import { OptionComponent } from './components/option/option.component';
 import { SelectComponent } from './components/select/select.component';
 import { NoSanitizePipe } from './pipes/no-sanitize.pipe';
 import { DeviceService } from './services/device/device.service';
+import { RenderedDirective } from './directives/rendered/rendered.directive';
 
 @NgModule({
-  declarations: [SelectComponent, OptionComponent, NoSanitizePipe],
+  declarations: [SelectComponent, OptionComponent, NoSanitizePipe, RenderedDirective],
   imports: [
     CommonModule,
     BrowserAnimationsModule

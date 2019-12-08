@@ -197,9 +197,6 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
   startFunctionality() {
     if (!this.disabled && this.elements) {
-
-      this.scrollManager.scrollElementTop();
-
       this.focus = true;
       this.scrolledOutside = false;
     }
