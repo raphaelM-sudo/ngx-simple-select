@@ -18,8 +18,16 @@ You are not restricted to use one Map or Array only, as your data source and can
 
 ## Installation
 
+Note: Ngx Simple Select requires Angular 8 or above.
+
 ```sh
 npm install @nutrify/ngx-simple-select --save
+```
+
+You might also need to install @angular/cdk:
+
+```sh
+npm install @angular/cdk --save
 ```
 
 For styling import @nutrify/ngx-simple-select/scss/styles.scss or @nutrify/ngx-simple-select/css/styles.css
