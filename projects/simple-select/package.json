@@ -1,0 +1,27 @@
+{
+  "$schema": "../../node_modules/ng-packagr/package.schema.json",
+  "name": "@nutrify/ngx-simple-select",
+  "version": "1.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Simple and lightweight, yet customizable select module for Angular",
+  "peerDependencies": {
+    "@angular/animations": "^7.0.0 || ^8.0.0 || ^9.0.0-0",
+    "@angular/cdk": "^7.0.0 || ^8.0.0 || ^9.0.0-0",
+    "@angular/core": "^7.0.0 || ^8.0.0 || ^9.0.0-0",
+    "@angular/common": "^7.0.0 || ^8.0.0 || ^9.0.0-0",
+    "@angular/forms": "^7.0.0 || ^8.0.0 || ^9.0.0-0"
+  },
+  "bugs": "https://github.com/raphaelM-sudo/ngx-simple-select/issues",
+  "homepage": "https://github.com/raphaelM-sudo/ngx-simple-select",
+  "repository": "raphaelM-sudo/ngx-simple-select",
+  "license": "MIT",
+  "ngPackage": {
+    "lib": {
+      "entryFile": "src/public-api.ts"
+    },
+    "dest": "../../dist/simple-select"
+  },
+  "keywords": ["angular", "select", "ui-select", "dropdown", "angular2", "option", "simple"]
+}

@@ -1,0 +1,11 @@
+<div class="simple-option-top"></div>
+<div #optionField [ngClass]="{'simple-highlighted-option': highlighted}" class="simple-option-container">
+  <div [@scroll]="{value: shouldScrollSideways() ? 'scrolled' : 'initial', params: {offset: overflowOffset}}">
+    <div class="simple-option-start"></div>
+    <div #content class="simple-option-content">
+      <ng-content></ng-content>
+    </div>
+    <div class="simple-option-end"></div>
+  </div>
+</div>
+<div class="simple-option-bottom"></div>
