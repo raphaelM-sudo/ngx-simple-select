@@ -271,9 +271,15 @@
     </simple-select>
   </div>
 
+  <div class="container-content">
+    <simple-select>
+      <simple-option *ngFor = "let name of names" [(value)]='name'>{{ name }}</simple-option>
+    </simple-select>
+  </div>
+
   <div class="container-content simple-select-number">
     <simple-select placeholder="Numbers">
-      <simple-option *ngFor="let x of [].constructor(4); let i = index" value="{{ i + 1 }}">{{ i + 1 }}</simple-option>
+      <simple-option disabled="{{ i % 2 ? true : false }}" *ngFor="let x of [].constructor(4); let i = index" value="{{ i + 1 }}">{{ i + 1 }}</simple-option>
     </simple-select>
   </div>
 

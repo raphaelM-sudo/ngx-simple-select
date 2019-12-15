@@ -24,9 +24,6 @@ export class ListKeyManager {
         case 'Backspace':
           // Ignore
           break;
-        case 'Tab':
-          this.pressedTab();
-          break;
         case 'Enter':
           this.pressedEnter();
           break;
@@ -41,11 +38,11 @@ export class ListKeyManager {
           break;
         case 'PageUp':
         case 'Home':
-          this.list.selectFirst();
+          this.pressedGoToFirst();
           break;
         case 'PageDown':
         case 'End':
-          this.list.selectLast();
+          this.pressedGoToLast();
           break;
         default:
           this.pressedSomeButton(key, alt, control);
@@ -62,14 +59,28 @@ export class ListKeyManager {
     }
   }
 
+  pressedGoToFirst() {
+    for (let i = 0; i < this.list.elements.length; i++) {
+      if (!this.list.skipPredicateFn(this.list.elements[i])) {
+        this.select.next(i);
+        return;
+      }
+    }
+  }
+
+  pressedGoToLast() {
+    for (let i = this.list.elements.length - 1; i >= 0; i--) {
+      if (!this.list.skipPredicateFn(this.list.elements[i])) {
+        this.select.next(i);
+        return;
+      }
+    }
+  }
+
   pressedArrowUp(alt: boolean) {
     if (alt) {
       this.blur.next();
       return;
-    }
-
-    if (this.list.highlightedIndex < 0) {
-      this.list.highlightedIndex = this.list.selectedIndex;
     }
 
     for ( let i = this.list.highlightedIndex - 1; i >= 0; i--) {
@@ -86,10 +97,6 @@ export class ListKeyManager {
       return;
     }
 
-    if (this.list.highlightedIndex < 0) {
-      this.list.highlightedIndex = this.list.selectedIndex;
-    }
-
     for ( let i = this.list.highlightedIndex + 1; i < this.list.elements.length; i++) {
       if (!this.list.skipPredicateFn(this.list.elements[i])) {
         this.select.next(i);
@@ -100,61 +107,54 @@ export class ListKeyManager {
 
   search(key: string) {
 
-    key = key.toUpperCase();
+    if (this.list.elements.length > 0) {
 
-    let searchIndex: number;
-    if (this.list.highlightedIndex < 0) {
-      searchIndex = 0;
-    } else {
-      searchIndex = this.list.highlightedIndex;
-    }
+      key = key.toUpperCase();
 
-    if (this.searchString.length > 0 && (this.searchString !== key)) {
+      let searchIndex: number;
+      if (this.list.highlightedIndex < 0) {
+        searchIndex = 0;
+      } else {
+        searchIndex = this.list.highlightedIndex;
+      }
 
-      this.searchString += key;
-    } else {
-      this.searchString = key;
-      searchIndex++;
-    }
+      if (this.searchString.length > 0 && (this.searchString !== key)) {
 
-    clearTimeout(this.timeoutHandler);
-    this.timeoutHandler = null;
+        this.searchString += key;
+      } else {
+        this.searchString = key;
+        searchIndex++;
+      }
 
-    this.timeoutHandler = setTimeout(() => {
+      clearTimeout(this.timeoutHandler);
+      this.timeoutHandler = null;
+
+      this.timeoutHandler = setTimeout(() => {
+        this.searchString = '';
+      }, INPUT_TIMEOUT);
+
+      for (let i = searchIndex; i < this.list.elements.length; i++) {
+        if (!this.list.skipPredicateFn(this.list.elements[i]) && this.list.elements[i].text.toUpperCase().startsWith(this.searchString)) {
+          this.select.next(i);
+          return;
+        }
+      }
+      for (let i = 0; i < searchIndex; i++) {
+        // TODO: Change toUpperCase because not usable in every language
+        if (!this.list.skipPredicateFn(this.list.elements[i]) && this.list.elements[i].text.toUpperCase().startsWith(this.searchString)) {
+          this.select.next(i);
+          return;
+        }
+      }
+
+      // If not found, reset search
       this.searchString = '';
-    }, INPUT_TIMEOUT);
-
-    for (let i = searchIndex; i < this.list.elements.length; i++) {
-      if (!this.list.skipPredicateFn(this.list.elements[i]) && this.list.elements[i].text.toUpperCase().startsWith(this.searchString)) {
-        this.select.next(i);
-        return;
-      }
     }
-    for (let i = 0; i < searchIndex; i++) {
-      // TODO: Change toUpperCase because not usable in every language
-      if (!this.list.skipPredicateFn(this.list.elements[i]) && this.list.elements[i].text.toUpperCase().startsWith(this.searchString)) {
-        this.select.next(i);
-        return;
-      }
-    }
-
-    // If not found, reset search
-    this.searchString = '';
-  }
-
-  // Tab selects the current highlightedIndex only if it is not in the initial state
-  pressedTab() {
-    if (this.list.selectedIndex >= 0 && this.list.highlightedIndex >= 0) {
-      this.select.next(this.list.highlightedIndex);
-    }
-    this.blur.next();
   }
 
   // Enter always selects the current highlightedIndex
   pressedEnter() {
-    if (this.list.highlightedIndex >= 0) {
-      this.select.next(this.list.highlightedIndex);
-    }
+    this.select.next(this.list.highlightedIndex);
     this.blur.next();
   }
 }

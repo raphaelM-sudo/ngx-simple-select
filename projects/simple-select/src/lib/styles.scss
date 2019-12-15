@@ -3,10 +3,10 @@ $simple-select-list-color:              #ffffff !default;
 $simple-select-placeholder-color:       #555555 !default;
 $simple-select-highlight-color:         #1e90ff !default;
 $simple-select-border-color:            lighten(#999999, 25%) !default;
-$simple-select-disabled-color:          lighten($simple-select-border-color, 10%) !default;
+$simple-select-disabled-color:          lighten($simple-select-border-color, 11%) !default;
 
-$simple-select-dropdown-min-width:      4em !default;
-$simple-select-dropdown-min-height:     1em !default;
+$simple-select-min-width:               4em !default;
+$simple-select-min-height:              2em !default;
 $simple-select-border-width:            1px !default;
 $simple-select-arrow-width:             8px !default;
 $simple-select-padding:                 4px !default;
@@ -28,7 +28,7 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
   text-align: left;
 
   vertical-align: middle;
-  min-width: $simple-select-dropdown-min-width;
+  min-width: $simple-select-min-width;
 
   cursor: default;
 
@@ -44,7 +44,7 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
 
 .simple-select-bar {
   height: 100%;
-  min-height: $simple-select-dropdown-min-height;
+  min-height: $simple-select-min-height;
   background: var(--simple-select-background-color);
   border: $simple-select-border-width solid transparent;
 }
@@ -215,7 +215,9 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
 }
 
 .simple-disabled {
-  background-color: var(--simple-select-disabled-color);
-  opacity: .65;
-  user-select: none;
+  * {
+    background-color: var(--simple-select-disabled-color);
+    opacity: .85;
+    user-select: none;
+  }
 }

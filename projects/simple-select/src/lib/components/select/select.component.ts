@@ -17,7 +17,7 @@ import { HasTabIndexCtor, mixinTabIndex } from '../../models/tab-index.model';
 import { DeviceService } from '../../services/device/device.service';
 import { ListKeyManager } from '../a11y/key-manager/list-key-manager';
 import { ListScrollManager } from '../a11y/scroll-manager/list-scroll-manager';
-import { DIRECTION_ELEMENT, OptionComponent } from '../option/option.component';
+import { OptionComponent, SELECT_ELEMENT } from '../option/option.component';
 
 let nextUniqueId = 0;
 
@@ -52,7 +52,7 @@ const _SimpleSelectMixinBase:
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
-      provide: DIRECTION_ELEMENT,
+      provide: SELECT_ELEMENT,
       useExisting: forwardRef(() => SelectComponent)
     },
     {
@@ -63,10 +63,10 @@ const _SimpleSelectMixinBase:
   ],
   // tslint:disable-next-line: use-host-property-decorator
   host: {
-    class: 'simple-select',
-    role: 'listbox',
     '[attr.id]': 'id',
     '[attr.tabindex]': 'tabIndex',
+    class: 'simple-select',
+    role: 'listbox',
     '[attr.aria-label]': 'ariaLabel',
     '[attr.aria-required]': 'required.toString()',
     '[attr.aria-disabled]': 'disabled.toString()',
@@ -92,8 +92,8 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
   @Input()
   get id(): string { return this._id; }
-  set id(value: string) {
-    this._id = value || this.uid;
+  set id(id: string) {
+    this._id = id || this.uid;
   }
 
   @Input()
@@ -106,20 +106,17 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
     return !this.hoverBorder || this.focus || this.mouseOver;
   }
 
+  get showArrowAnimation() {
+    return this.focus;
+  }
+
   get showList() {
-    return this.focus && !this.scrolledOutside;
+    return this.elements.length > 0 && this.focus;
   }
 
   get selected(): OptionComponent {
     if (this.selectedIndex >= 0 && this.elements.length > this.selectedIndex) {
       return this.elements[this.selectedIndex];
-    }
-    return null;
-  }
-
-  get highlighted(): OptionComponent {
-    if (this.highlightedIndex >= 0 && this.elements.length > this.highlightedIndex) {
-      return this.elements[this.highlightedIndex];
     }
     return null;
   }
@@ -130,7 +127,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
         if (this.elements) {
 
           for (const option of this.elements) {
-            if (option.isRTL()) {
+            if (option.isRTL) {
               return Direction.RightToLeft;
             }
           }
@@ -154,8 +151,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   }
 
   get activeDescendant(): string | null {
-    const selected = this.selected;
-    return selected ? selected.id : null;
+    return this.selectedIndex >= 0 ? this.elements[this.selectedIndex].id : null;
   }
 
   get elements() {
@@ -182,9 +178,10 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   // Enum for usage in template
   Direction = Direction;
 
+  isEdgeBrowser = false;
+
   focus = false;
   mouseOver = false;
-  scrolledOutside = false;
   selectedIndex = -1;
   highlightedIndex = -1;
 
@@ -196,13 +193,20 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   propagateTouched = () => {};
 
   startFunctionality() {
-    if (!this.disabled && this.elements) {
+    // If not disabled and not already focused
+    if (!this.disabled && !this.focus) {
+      this.highlightIndex(this.selectedIndex);
       this.focus = true;
-      this.scrolledOutside = false;
     }
   }
 
   stopFunctionality() {
+
+    // Call stopFunctionality of the highlighted option to stop sideway scroll
+    if (this.highlightedIndex >= 0 && this.highlightedIndex < this.elements.length) {
+      this.elements[this.highlightedIndex].stopFunctionality();
+    }
+
     this.focus = false;
     this.propagateTouched();
   }
@@ -216,63 +220,63 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   }
 
   scrolledOutsideSelect() {
-    if (!this.mouseOver) {
-      this.scrolledOutside = true;
+    if (!this.mouseOver && !this.disabled && this.focus) {
+      this.blur();
     }
   }
 
-  selectIndex(index: number, initial?: boolean) {
-    if (this.elements.length > this.selectedIndex && this.selectedIndex !== index) {
+  blur() {
+    if (!this.isEdgeBrowser) {
+      this.elementRef.nativeElement.blur();
+    } else {
+      // Edge workaround to maintain tabindex
+      // After bluring an element in Edge, the tabindex resets
+      // It works, but the focus stays and startFunctionality triggers after reselecting the browser window
+      // Won't fix this - Edge should fix its bugs...
+      this.stopFunctionality();
+    }
+  }
 
-      if (this.selectedIndex >= 0) {
-        this.elements[this.selectedIndex].selected = false;
-      }
+  renderedList() {
+    this.scrollManager.scrollElementTop(this.highlightedIndex);
+  }
 
-      this.selectedIndex = index;
+  selectIndex(index: number) {
+    if (this.elements.length > 0) {
 
       if (index >= 0) {
-        this.elements[index].selected = true;
-        this.highlightIndex(index);
+        if (!this.skipPredicateFn(this.elements[index])) {
+          // Do not reselect, but highlight
+          if (this.selectedIndex !== index) {
+            if (this.selectedIndex >= 0) {
+              this.elements[this.selectedIndex].selected = false;
+            }
 
-        if (!initial) {
-          this.scrollManager.correctScroll();
+            this.elements[index].selected = true;
+            this.selectedIndex = index;
+            this.emit();
+          }
+
+          this.highlightIndex(index);
         }
-
-        this.emit();
+      } else {
+        this.selectedIndex = index;
       }
     }
   }
 
   highlightIndex(index: number) {
-    if (index >= 0 &&
-      this.elements.length > this.highlightedIndex &&
+    if (this.elements.length > 0 &&
+      index >= 0 &&
       this.highlightedIndex !== index &&
       !this.skipPredicateFn(this.elements[index])) {
 
-      if (this.highlighted) {
+      if (this.highlightedIndex >= 0 && this.highlightedIndex < this.elements.length) {
         this.elements[this.highlightedIndex].highlighted = false;
       }
 
       this.elements[index].highlighted = true;
       this.highlightedIndex = index;
-    }
-  }
-
-  selectFirst() {
-    for (let i = 0; i < this.elements.length; i++) {
-      if (!this.skipPredicateFn(this.elements[i])) {
-        this.selectIndex(i);
-        return;
-      }
-    }
-  }
-
-  selectLast() {
-    for (let i = this.elements.length - 1; i >= 0; i--) {
-      if (!this.skipPredicateFn(this.elements[i])) {
-        this.selectIndex(i);
-        return;
-      }
     }
   }
 
@@ -296,41 +300,19 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
         this.optionSubscriptions.push(element.select.pipe(takeUntil(this.destroy)).subscribe(() => {
           this.selectIndex(i);
-          this.elementRef.nativeElement.blur();
         }));
 
         this.optionSubscriptions.push(element.highlight.pipe(takeUntil(this.destroy)).subscribe(() => {
           this.highlightIndex(i);
-          this.scrollManager.scrollClippedElement();
+          this.scrollManager.scrollClippedElement(i);
         }));
       }
     }
   }
 
-  ngAfterViewInit() {
-
-    this.initOptions();
-    // Reset highlightedIndex to 0 or to the selectedIndex
-    this.highlightIndex((this.selectedIndex >= 0) ? this.selectedIndex : 0);
-
-    this.options.changes.pipe(takeUntil(this.destroy)).subscribe(() => {
-
-      // Reset the selection when the options changed
-      this.selectIndex(-1);
-
-      this.initOptions();
-
-      this.highlightIndex(0);
-    });
-
-    this.cdRef.detectChanges();
-  }
-
   emit() {
-    const selected = this.selected;
-
-    if (selected) {
-      this.value = selected.val;
+    if (this.selectedIndex >= 0) {
+      this.value = this.elements[this.selectedIndex].value;
     }
     this.propagateChange(this.value);
   }
@@ -341,8 +323,8 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
       if (this.elementRef) {
         for (let i = 0; i < this.elements.length; i++) {
-          if (this.elements[i].val === value) {
-            this.selectIndex(i, true);
+          if (this.elements[i].value === value) {
+            this.selectIndex(i);
             return;
           }
         }
@@ -363,6 +345,25 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
     this.disabled = isDisabled;
   }
 
+  ngAfterViewInit() {
+
+    this.initOptions();
+    // Reset highlightedIndex to 0 or to the selectedIndex
+    this.highlightIndex((this.selectedIndex >= 0) ? this.selectedIndex : 0);
+
+    this.options.changes.pipe(takeUntil(this.destroy)).subscribe(() => {
+
+      // Reset the selection when the options changed
+      this.selectIndex(-1);
+      this.initOptions();
+      this.highlightIndex(0);
+
+      this.cdRef.markForCheck();
+    });
+
+    this.cdRef.detectChanges();
+  }
+
   constructor(
     private cdRef: ChangeDetectorRef,
     public device: DeviceService,
@@ -371,16 +372,19 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
     super(elementRef);
 
+    this.isEdgeBrowser = /Edge\/\d./i.test(window.navigator.userAgent);
+
     this.scrollManager = new ListScrollManager(this);
     this.keyManager = new ListKeyManager(this);
 
     this.keyManager.blur.pipe(takeUntil(this.destroy)).subscribe(() => {
-      this.elementRef.nativeElement.blur();
+      this.blur();
     });
 
     this.keyManager.select.pipe(takeUntil(this.destroy)).subscribe((index: number) => {
       this.selectIndex(index);
       this.emit();
+      this.scrollManager.correctScroll(this.highlightedIndex);
     });
 
     this.tabIndex = parseInt(tabIndex, 10) || 0;

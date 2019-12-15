@@ -22,17 +22,20 @@ export class ListScrollManager {
     return element.nativeElement.getBoundingClientRect().bottom;
   }
 
-  correctScroll() {
+  correctScroll(index: number) {
 
-    if (this.scrollableList.list && this.scrollableList.elements.length > this.scrollableList.highlightedIndex) {
+    if (index >= 0 &&
+      this.scrollableList.elements.length > 0 &&
+      this.scrollableList.list &&
+      this.scrollableList.elements.length > index) {
 
-      const selected = this.scrollableList.elements[this.scrollableList.highlightedIndex];
+      const selection = this.scrollableList.elements[index];
 
       const dropdownTop = this.offsetTop(this.scrollableList.list);
-      const elementTop = this.offsetTop(selected.element);
+      const elementTop = this.offsetTop(selection.element);
 
       const dropdownBottom = this.offsetBottom(this.scrollableList.list);
-      const elementBottom = this.offsetBottom(selected.element);
+      const elementBottom = this.offsetBottom(selection.element);
 
       if (elementBottom > dropdownBottom) {
         this.scrollDown(this.scrollableList.list, elementBottom - dropdownBottom);
@@ -42,17 +45,20 @@ export class ListScrollManager {
     }
   }
 
-  scrollClippedElement() {
+  scrollClippedElement(index: number) {
 
-    if (this.scrollableList.list && this.scrollableList.elements.length > this.scrollableList.highlightedIndex) {
+    if (index >= 0 &&
+      this.scrollableList.elements.length > 0 &&
+      this.scrollableList.list &&
+      this.scrollableList.elements.length > index) {
 
-      const selected = this.scrollableList.elements[this.scrollableList.highlightedIndex];
+      const selection = this.scrollableList.elements[index];
 
       const dropdownTop = this.offsetTop(this.scrollableList.list);
-      const elementTop = this.offsetTop(selected.element);
+      const elementTop = this.offsetTop(selection.element);
 
       const dropdownBottom = this.offsetBottom(this.scrollableList.list);
-      const elementBottom = this.offsetBottom(selected.element);
+      const elementBottom = this.offsetBottom(selection.element);
 
       if (elementBottom > dropdownBottom && elementTop < dropdownBottom) {
         this.scrollDown(this.scrollableList.list, elementBottom - dropdownBottom);
@@ -62,14 +68,17 @@ export class ListScrollManager {
     }
   }
 
-  scrollElementTop() {
+  scrollElementTop(index: number) {
 
-    if (this.scrollableList.list && this.scrollableList.elements.length > this.scrollableList.highlightedIndex) {
+    if (index >= 0 &&
+      this.scrollableList.elements.length > 0 &&
+      this.scrollableList.list &&
+      this.scrollableList.elements.length > index) {
 
-      const highlighted = this.scrollableList.elements[this.scrollableList.highlightedIndex];
+      const selection = this.scrollableList.elements[index];
 
       const dropdownTop = this.offsetTop(this.scrollableList.list);
-      const elementTop = this.offsetTop(highlighted.element);
+      const elementTop = this.offsetTop(selection.element);
 
       this.scrollUp(this.scrollableList.list, dropdownTop - elementTop);
     }

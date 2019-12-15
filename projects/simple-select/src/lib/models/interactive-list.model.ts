@@ -5,6 +5,4 @@ export interface IInteractiveList {
   elements: IInteractiveElement[];
   selectedIndex: number;
   highlightedIndex: number;
-  selectFirst: () => void;
-  selectLast: () => void;
 }

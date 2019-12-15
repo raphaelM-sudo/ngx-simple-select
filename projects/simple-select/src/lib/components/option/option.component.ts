@@ -3,16 +3,25 @@ import { Subject } from 'rxjs';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import {
     ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, InjectionToken,
-    Input, ViewChild, ViewEncapsulation
+    Input, Optional, ViewChild, ViewEncapsulation
 } from '@angular/core';
 
-import { IDirectionElement } from '../../models/direction-element.model';
 import { Direction } from '../../models/direction.enum';
+import { CanDisableCtor, mixinDisabled } from '../../models/disable.model';
 import { IScrollableElement } from '../../models/scrollable-element.model';
+import { ISelectElement } from '../../models/select-element.model';
+import { DirectionService } from '../../services/direction/direction.service';
 
-export const DIRECTION_ELEMENT = new InjectionToken<IDirectionElement>('OPTION_PARENT_COMPONENT');
+export const SELECT_ELEMENT = new InjectionToken<ISelectElement>('OPTION_PARENT_COMPONENT');
 
 let nextUniqueId = 0;
+
+class SimpleOptionBase {}
+
+// tslint:disable-next-line: variable-name
+const _SimpleSelectMixinBase:
+    CanDisableCtor &
+    typeof SimpleOptionBase = mixinDisabled(SimpleOptionBase);
 
 @Component({
   selector: 'simple-option',
@@ -31,13 +40,14 @@ let nextUniqueId = 0;
     ]),
   ],
   templateUrl: './option.component.html',
+  inputs: ['disabled'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   // tslint:disable-next-line: use-host-property-decorator
   host: {
+    '[attr.id]': 'id',
     class: 'simple-option',
     role: 'option',
-    '[attr.id]': 'id',
     '[attr.aria-selected]': 'selected.toString()',
     '[attr.aria-disabled]': 'disabled.toString()',
     '[class.simple-disabled]': 'disabled',
@@ -48,12 +58,10 @@ let nextUniqueId = 0;
     '(mousemove)': 'startFunctionality()'
   }
 })
-export class OptionComponent implements IScrollableElement {
+export class OptionComponent extends _SimpleSelectMixinBase implements IScrollableElement {
 
   @Input() label?: string;
-  @Input() value: string | number = null;
-  @Input() ngValue: object = null;
-  @Input() disabled = false;
+  @Input() value: any;
   @Input() dir?: 'ltr' | 'rtl' | 'auto';
 
   @Input()
@@ -69,14 +77,6 @@ export class OptionComponent implements IScrollableElement {
   select: Subject<void> = new Subject<void>();
 
   Direction = Direction;
-
-  get val(): object | string | number {
-    if (this.ngValue) {
-      return this.ngValue;
-    }
-
-    return this.value;
-  }
 
   get text(): string {
 
@@ -103,6 +103,7 @@ export class OptionComponent implements IScrollableElement {
     return this.content.nativeElement.textContent as string;
   }
 
+  // Used in select.component.html
   get html(): string {
 
     if (this.content) {
@@ -112,10 +113,14 @@ export class OptionComponent implements IScrollableElement {
     return '';
   }
 
+  get isRTL() {
+    return this.dirService.isRTL(this.text);
+  }
+
   get direction(): Direction {
 
-    if (!this.dir && this.parentDirection.dir) {
-      this.dir = this.parentDirection.dir;
+    if (!this.dir && this.parent && this.parent.dir) {
+      this.dir = this.parent.dir;
     }
 
     if (this.dir) {
@@ -124,7 +129,7 @@ export class OptionComponent implements IScrollableElement {
         case 'rtl':
         return Direction.RightToLeft;
         case 'auto':
-        return this.isRTL() ? Direction.RightToLeft : Direction.LeftToRight;
+        return this.isRTL ? Direction.RightToLeft : Direction.LeftToRight;
         default:
         return Direction.LeftToRight;
       }
@@ -147,20 +152,12 @@ export class OptionComponent implements IScrollableElement {
   private _highlighted = false;
 
   private uid = `simple-option-${++nextUniqueId}`;
+  private clientWidth = -1;
 
   selected = false;
   hovered = false;
   overflowOffset = 0;
   scrollSideways = false;
-
-  isRTL() {
-    const ltrChars = 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF' + '\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF';
-    const rtlChars = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
-
-    const rtlDirCheck = new RegExp('^[^' + ltrChars + ']*[' + rtlChars + ']');
-
-    return rtlDirCheck.test(this.text);
-  }
 
   shouldScrollSideways() {
     return this.highlighted && this.hovered && this.scrollSideways;
@@ -169,26 +166,38 @@ export class OptionComponent implements IScrollableElement {
   startFunctionality() {
     this.hovered = true;
 
+    // Should be always calculated in case the window size changed
+    this.calculateScroll();
+
     if (!this.highlighted) {
       this.highlight.next();
-      this.calculateScroll();
     }
   }
 
   stopFunctionality() {
     this.hovered = false;
+    this.cdRef.markForCheck(); // Necessary to display sideway scroll properly
   }
 
   calculateScroll() {
-    if (this.hovered) {
 
-      const element = this.element.nativeElement;
+    const element = this.element.nativeElement;
 
-      if (element.scrollWidth > element.clientWidth) {
+    // Only recalculate when the client width changed
+    if (element.clientWidth !== this.clientWidth) {
+
+      // Set clientWidth to the current width
+      this.clientWidth = element.clientWidth;
+
+      // Edge gonna be Edge...
+      // Simple greater than comparison does not work in Edge
+      // It seems to be a floating point issue
+      // Microsoft Edge 44.18362.449.0
+      if (Math.ceil(element.scrollWidth - element.clientWidth) > 1) {
         this.scrollSideways = true;
         this.overflowOffset = element.clientWidth - element.scrollWidth;
 
-        this.overflowOffset -= 5;
+        this.overflowOffset -= 5; // Hard coded scroll bar width for now
 
         if (this.direction === Direction.RightToLeft) {
           this.overflowOffset = -this.overflowOffset;
@@ -200,7 +209,13 @@ export class OptionComponent implements IScrollableElement {
     }
   }
 
-  constructor(private cdRef: ChangeDetectorRef, @Inject(DIRECTION_ELEMENT) private parentDirection: IDirectionElement) {
+  constructor(
+    private cdRef: ChangeDetectorRef,
+    private dirService: DirectionService,
+    @Optional() @Inject(SELECT_ELEMENT) private parent: ISelectElement
+  ) {
+    super();
+
     // Force setter to be called in case id was not specified.
     this.id = this.id;
   }
