@@ -7,11 +7,11 @@ export class ListScrollManager {
   constructor(private scrollableList: IScrollableList) {}
 
   scrollDown(element: ElementRef<any>, offset: number) {
-    element.nativeElement.scrollTop += offset;
+    element.nativeElement.scrollTop += Math.round(offset);
   }
 
   scrollUp(element: ElementRef<any>, offset: number) {
-    element.nativeElement.scrollTop -= offset;
+    element.nativeElement.scrollTop -= Math.round(offset);
   }
 
   offsetTop(element: ElementRef<any>) {

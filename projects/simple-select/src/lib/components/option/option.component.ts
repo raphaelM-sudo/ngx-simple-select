@@ -10,6 +10,7 @@ import { Direction } from '../../models/direction.enum';
 import { CanDisableCtor, mixinDisabled } from '../../models/disable.model';
 import { IScrollableElement } from '../../models/scrollable-element.model';
 import { ISelectElement } from '../../models/select-element.model';
+import { BrowserService } from '../../services/browser/browser.service';
 import { DirectionService } from '../../services/direction/direction.service';
 
 export const SELECT_ELEMENT = new InjectionToken<ISelectElement>('OPTION_PARENT_COMPONENT');
@@ -193,7 +194,11 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
       // Simple greater than comparison does not work in Edge
       // It seems to be a floating point issue
       // Microsoft Edge 44.18362.449.0
-      if (Math.ceil(element.scrollWidth - element.clientWidth) > 1) {
+
+      if (!this.browser.isEdge && (element.scrollWidth > element.clientWidth) ||
+        (element.scrollWidth - element.clientWidth) > 1
+      ) {
+
         this.scrollSideways = true;
         this.overflowOffset = element.clientWidth - element.scrollWidth;
 
@@ -211,6 +216,7 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
 
   constructor(
     private cdRef: ChangeDetectorRef,
+    private browser: BrowserService,
     private dirService: DirectionService,
     @Optional() @Inject(SELECT_ELEMENT) private parent: ISelectElement
   ) {
