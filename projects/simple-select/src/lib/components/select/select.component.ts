@@ -14,6 +14,7 @@ import { CanDisable, CanDisableCtor, mixinDisabled } from '../../models/disable.
 import { IInteractiveList } from '../../models/interactive-list.model';
 import { IScrollableList } from '../../models/scrollable-list.model';
 import { HasTabIndexCtor, mixinTabIndex } from '../../models/tab-index.model';
+import { BrowserService } from '../../services/browser/browser.service';
 import { DeviceService } from '../../services/device/device.service';
 import { ListKeyManager } from '../a11y/key-manager/list-key-manager';
 import { ListScrollManager } from '../a11y/scroll-manager/list-scroll-manager';
@@ -178,8 +179,6 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   // Enum for usage in template
   Direction = Direction;
 
-  isEdgeBrowser = false;
-
   focus = false;
   mouseOver = false;
   selectedIndex = -1;
@@ -226,7 +225,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   }
 
   blur() {
-    if (!this.isEdgeBrowser) {
+    if (!this.browser.isEdge) {
       this.elementRef.nativeElement.blur();
     } else {
       // Edge workaround to maintain tabindex
@@ -366,13 +365,12 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
   constructor(
     private cdRef: ChangeDetectorRef,
+    private browser: BrowserService,
     public device: DeviceService,
     elementRef: ElementRef,
     @Attribute('tabindex') tabIndex: string) {
 
     super(elementRef);
-
-    this.isEdgeBrowser = /Edge\/\d./i.test(window.navigator.userAgent);
 
     this.scrollManager = new ListScrollManager(this);
     this.keyManager = new ListKeyManager(this);
