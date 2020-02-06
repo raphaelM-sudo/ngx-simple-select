@@ -152,7 +152,10 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   }
 
   get activeDescendant(): string | null {
-    return this.selectedIndex >= 0 ? this.elements[this.selectedIndex].id : null;
+    if (this.selectedIndex >= 0 && this.elements[this.selectedIndex]) {
+      return this.elements[this.selectedIndex].id;
+    }
+    return null;
   }
 
   get elements() {
@@ -260,6 +263,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
         }
       } else {
         this.selectedIndex = index;
+        this.highlightIndex(0);
       }
     }
   }
@@ -351,16 +355,27 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
     this.highlightIndex((this.selectedIndex >= 0) ? this.selectedIndex : 0);
 
     this.options.changes.pipe(takeUntil(this.destroy)).subscribe(() => {
-
-      // Reset the selection when the options changed
-      this.selectIndex(-1);
-      this.initOptions();
-      this.highlightIndex(0);
-
-      this.cdRef.markForCheck();
+      this.updateOptions();
     });
 
     this.cdRef.detectChanges();
+  }
+
+  updateOptions() {
+    // Reset the selection when the options changed
+    this.initOptions();
+    let selectedIndex = -1;
+
+    // Select option based on previously selected value
+    for (let i = 0; i < this.elements.length; i++) {
+      if (this.elements[i].value === this.value) {
+        selectedIndex = i;
+        break;
+      }
+    }
+
+    this.selectIndex(selectedIndex);
+    this.cdRef.markForCheck();
   }
 
   constructor(
