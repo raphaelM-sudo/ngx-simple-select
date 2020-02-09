@@ -273,7 +273,7 @@
 
   <div class="container-content">
     <simple-select>
-      <simple-option *ngFor = "let name of names" [(value)]='name'>{{ name }}</simple-option>
+      <simple-option *ngFor = "let name of names" (value)='name'>{{ name }}</simple-option>
     </simple-select>
   </div>
 
