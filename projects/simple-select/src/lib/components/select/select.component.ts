@@ -26,7 +26,7 @@ let nextUniqueId = 0;
 class SimpleSelectBase {
   constructor(public elementRef: ElementRef) {}
 }
-// tslint:disable-next-line: variable-name
+
 const _SimpleSelectMixinBase:
     CanDisableCtor &
     HasTabIndexCtor &
@@ -84,7 +84,6 @@ const _SimpleSelectMixinBase:
 export class SelectComponent extends _SimpleSelectMixinBase
 implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, ControlValueAccessor {
 
-  // tslint:disable-next-line: variable-name no-input-rename
   @Input('aria-label') private _ariaLabel?: string;
   @Input() placeholder?: string;
   @Input() hoverBorder = false;
@@ -170,7 +169,6 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   @ViewChild('optionList', { static: true }) list: ElementRef;
   @ContentChildren(forwardRef(() => OptionComponent)) options: QueryList<OptionComponent>;
 
-  // tslint:disable: variable-name
   private _id: string;
   private _required = false;
   private _elements: OptionComponent[] = [];

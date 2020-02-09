@@ -19,7 +19,6 @@ let nextUniqueId = 0;
 
 class SimpleOptionBase {}
 
-// tslint:disable-next-line: variable-name
 const _SimpleSelectMixinBase:
     CanDisableCtor &
     typeof SimpleOptionBase = mixinDisabled(SimpleOptionBase);
@@ -148,7 +147,6 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
     this.cdRef.detectChanges();
   }
 
-  // tslint:disable: variable-name
   private _id: string;
   private _highlighted = false;
 
