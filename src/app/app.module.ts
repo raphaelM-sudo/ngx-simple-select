@@ -1,8 +1,10 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { SimpleSelectModule } from 'projects/simple-select/src/lib/simple-select.module';
+
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { SimpleSelectModule } from 'projects/simple-select/src/lib/simple-select.module';
 
 @NgModule({
   declarations: [
@@ -10,7 +12,8 @@ import { SimpleSelectModule } from 'projects/simple-select/src/lib/simple-select
   ],
   imports: [
     BrowserModule,
-    SimpleSelectModule
+    ReactiveFormsModule,
+    SimpleSelectModule // SimpleSelectModule already exports FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

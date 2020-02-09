@@ -272,7 +272,7 @@
   </div>
 
   <div class="container-content">
-    <simple-select required>
+    <simple-select [formControl]="nameControl" required>
       <simple-option *ngFor = "let name of names" [value]='name'>{{ name }}</simple-option>
     </simple-select>
   </div>
