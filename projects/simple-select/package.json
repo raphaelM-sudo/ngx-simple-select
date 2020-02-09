@@ -7,11 +7,11 @@
   },
   "description": "Simple and lightweight, yet customizable select module for Angular",
   "peerDependencies": {
-    "@angular/animations": "^8.0.0 || ^9.0.0-0",
-    "@angular/cdk": "^8.0.0 || ^9.0.0-0",
-    "@angular/core": "^8.0.0 || ^9.0.0-0",
-    "@angular/common": "^8.0.0 || ^9.0.0-0",
-    "@angular/forms": "^8.0.0 || ^9.0.0-0"
+    "@angular/animations": "^9.0.0-0",
+    "@angular/cdk": "^9.0.0-0",
+    "@angular/core": "^9.0.0-0",
+    "@angular/common": "^9.0.0-0",
+    "@angular/forms": "^9.0.0-0"
   },
   "bugs": "https://github.com/raphaelM-sudo/ngx-simple-select/issues",
   "homepage": "https://github.com/raphaelM-sudo/ngx-simple-select",
