@@ -5,11 +5,12 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
     AfterViewInit, Attribute, ChangeDetectionStrategy, ChangeDetectorRef, Component,
-    ContentChildren, ElementRef, forwardRef, Input, QueryList, ViewChild, ViewEncapsulation
+    ContentChildren, ElementRef, Input, Optional, QueryList, Self, ViewChild, ViewEncapsulation, DoCheck
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import {
-    CanDisable, CanDisableCtor, HasTabIndexCtor, mixinDisabled, mixinTabIndex
+    CanDisable, CanDisableCtor, CanUpdateErrorState, CanUpdateErrorStateCtor, ErrorStateMatcher,
+    HasTabIndex, HasTabIndexCtor, mixinDisabled, mixinErrorState, mixinTabIndex
 } from '@angular/material/core';
 
 import { Direction } from '../../models/direction.enum';
@@ -24,13 +25,18 @@ import { OptionComponent, SELECT_ELEMENT } from '../option/option.component';
 let nextUniqueId = 0;
 
 class SimpleSelectBase {
-  constructor(public elementRef: ElementRef) {}
+  constructor(public _elementRef: ElementRef,
+              public _defaultErrorStateMatcher: ErrorStateMatcher,
+              public _parentForm: NgForm,
+              public _parentFormGroup: FormGroupDirective,
+              public ngControl: NgControl) {}
 }
 
 const _SimpleSelectMixinBase:
     CanDisableCtor &
     HasTabIndexCtor &
-    typeof SimpleSelectBase = mixinTabIndex(mixinDisabled(SimpleSelectBase));
+    CanUpdateErrorStateCtor &
+    typeof SimpleSelectBase = mixinTabIndex(mixinDisabled(mixinErrorState(SimpleSelectBase)));
 
 @Component({
   selector: 'simple-select',
@@ -55,12 +61,7 @@ const _SimpleSelectMixinBase:
   providers: [
     {
       provide: SELECT_ELEMENT,
-      useExisting: forwardRef(() => SelectComponent)
-    },
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SelectComponent),
-      multi: true
+      useExisting: SelectComponent
     }
   ],
   // tslint:disable-next-line: use-host-property-decorator
@@ -72,8 +73,11 @@ const _SimpleSelectMixinBase:
     '[attr.aria-label]': 'ariaLabel',
     '[attr.aria-required]': 'required.toString()',
     '[attr.aria-disabled]': 'disabled.toString()',
+    '[attr.aria-invalid]': 'errorState',
     '[attr.aria-activedescendant]': 'activeDescendant',
     '[class.simple-disabled]': 'disabled',
+    '[class.simple-invalid]': 'errorState',
+    '[class.simple-required]': 'required',
     '[class.simple-select-mobile-tablet]': 'device.mobileOrTablet',
     '(blur)': 'stopFunctionality()',
     '(document:scroll)': 'scrolledOutsideSelect()',
@@ -82,7 +86,8 @@ const _SimpleSelectMixinBase:
   }
 })
 export class SelectComponent extends _SimpleSelectMixinBase
-implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, ControlValueAccessor {
+implements ControlValueAccessor, DoCheck, CanDisable, HasTabIndex, CanUpdateErrorState,
+IScrollableList, IInteractiveList, AfterViewInit {
 
   @Input('aria-label') private _ariaLabel?: string;
   @Input() placeholder?: string;
@@ -90,6 +95,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   @Input() animate = true;
   @Input() value: object | string | number;
   @Input() dir?: 'ltr' | 'rtl' | 'auto';
+  @Input() errorStateMatcher: ErrorStateMatcher;
 
   @Input()
   get id(): string { return this._id; }
@@ -167,7 +173,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
   }
 
   @ViewChild('optionList', { static: true }) list: ElementRef;
-  @ContentChildren(forwardRef(() => OptionComponent)) options: QueryList<OptionComponent>;
+  @ContentChildren(OptionComponent, {descendants: true}) options: QueryList<OptionComponent>;
 
   private _id: string;
   private _required = false;
@@ -210,6 +216,13 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
     this.focus = false;
     this.propagateTouched();
+
+    // Additional error checking
+    if (!this.value && this.required) {
+      this.errorState = true;
+    } else {
+      this.errorState = false;
+    }
   }
 
   mouseenter() {
@@ -228,7 +241,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
 
   blur() {
     if (!this.browser.isEdge) {
-      this.elementRef.nativeElement.blur();
+      this._elementRef.nativeElement.blur();
     } else {
       // Edge workaround to maintain tabindex
       // After bluring an element in Edge, the tabindex resets
@@ -323,7 +336,7 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
     if (value !== null) {
       this.value = value;
 
-      if (this.elementRef) {
+      if (this._elementRef) {
         for (let i = 0; i < this.elements.length; i++) {
           if (this.elements[i].value === value) {
             this.selectIndex(i);
@@ -377,14 +390,31 @@ implements CanDisable, IScrollableList, IInteractiveList, AfterViewInit, Control
     this.cdRef.markForCheck();
   }
 
+  ngDoCheck() {
+    if (this.ngControl) {
+      this.updateErrorState();
+    }
+  }
+
   constructor(
     private cdRef: ChangeDetectorRef,
     private browser: BrowserService,
     public device: DeviceService,
     elementRef: ElementRef,
+    _defaultErrorStateMatcher: ErrorStateMatcher,
+    @Optional() _parentForm: NgForm,
+    @Optional() _parentFormGroup: FormGroupDirective,
+    @Self() @Optional() public ngControl: NgControl,
     @Attribute('tabindex') tabIndex: string) {
 
-    super(elementRef);
+    super(elementRef, _defaultErrorStateMatcher, _parentForm,
+          _parentFormGroup, ngControl);
+
+    if (this.ngControl) {
+      // Note: we provide the value accessor through here, instead of
+      // the `providers` to avoid running into a circular import.
+      this.ngControl.valueAccessor = this;
+    }
 
     this.scrollManager = new ListScrollManager(this);
     this.keyManager = new ListKeyManager(this);
