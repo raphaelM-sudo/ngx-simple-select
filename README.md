@@ -19,6 +19,7 @@ You are not restricted to use one Map or Array only, as your data source and can
 ## Installation
 
 Note: Ngx Simple Select requires Angular 8 or above.
+Ngx Simple Select 2.0.0 requires Angular 9.
 
 ```sh
 npm install @nutrify/ngx-simple-select --save
