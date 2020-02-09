@@ -1,4 +1,5 @@
 import { Component, OnInit, VERSION } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +12,8 @@ export class AppComponent implements OnInit {
   version = VERSION.full;
 
   countryID = 'AT';
+
+  nameControl = new FormControl('', [Validators.required]);
 
   names = [
     'Alice',

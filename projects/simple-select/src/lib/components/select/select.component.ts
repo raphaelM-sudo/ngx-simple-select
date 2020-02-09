@@ -208,7 +208,6 @@ IScrollableList, IInteractiveList, AfterViewInit {
   }
 
   stopFunctionality() {
-
     // Call stopFunctionality of the highlighted option to stop sideway scroll
     if (this.highlightedIndex >= 0 && this.highlightedIndex < this.elements.length) {
       this.elements[this.highlightedIndex].stopFunctionality();
@@ -216,13 +215,6 @@ IScrollableList, IInteractiveList, AfterViewInit {
 
     this.focus = false;
     this.propagateTouched();
-
-    // Additional error checking
-    if (!this.value && this.required) {
-      this.errorState = true;
-    } else {
-      this.errorState = false;
-    }
   }
 
   mouseenter() {
@@ -256,8 +248,7 @@ IScrollableList, IInteractiveList, AfterViewInit {
   }
 
   selectIndex(index: number) {
-    if (this.elements.length > 0) {
-
+    if (index < this.elements.length) {
       if (index >= 0) {
         if (!this.skipPredicateFn(this.elements[index])) {
           // Do not reselect, but highlight
@@ -276,6 +267,7 @@ IScrollableList, IInteractiveList, AfterViewInit {
       } else {
         this.selectedIndex = index;
         this.highlightIndex(0);
+        this.emit();
       }
     }
   }
@@ -296,7 +288,6 @@ IScrollableList, IInteractiveList, AfterViewInit {
   }
 
   initOptions() {
-
     if (this.options) {
 
       // Removing previous subscriptions
@@ -326,9 +317,12 @@ IScrollableList, IInteractiveList, AfterViewInit {
   }
 
   emit() {
-    if (this.selectedIndex >= 0) {
+    if (this.selectedIndex >= 0 && this.selectedIndex < this.elements.length) {
       this.value = this.elements[this.selectedIndex].value;
+    } else {
+      this.value = null;
     }
+
     this.propagateChange(this.value);
   }
 
