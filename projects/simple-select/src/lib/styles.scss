@@ -4,6 +4,7 @@ $simple-select-placeholder-color:       #555555 !default;
 $simple-select-highlight-color:         #1e90ff !default;
 $simple-select-border-color:            lighten(#999999, 25%) !default;
 $simple-select-disabled-color:          lighten($simple-select-border-color, 11%) !default;
+$simple-select-invalid-color:           rgba(255, 0, 0, .5) !default;
 
 $simple-select-min-width:               4em !default;
 $simple-select-min-height:              2em !default;
@@ -20,6 +21,7 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
   --simple-select-highlight-color:      #{$simple-select-highlight-color};
   --simple-select-border-color:         #{$simple-select-border-color};
   --simple-select-disabled-color:       #{$simple-select-disabled-color};
+  --simple-select-invalid-color:        #{$simple-select-invalid-color};
 }
 
 .simple-select {
@@ -220,4 +222,8 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
     opacity: .85;
     user-select: none;
   }
+}
+
+.simple-invalid {
+  box-shadow: 0px $simple-select-border-width 5px 1px var(--simple-select-invalid-color);
 }

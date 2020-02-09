@@ -5,9 +5,9 @@ import {
     ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, InjectionToken,
     Input, Optional, ViewChild, ViewEncapsulation
 } from '@angular/core';
+import { CanDisableCtor, mixinDisabled } from '@angular/material/core';
 
 import { Direction } from '../../models/direction.enum';
-import { CanDisableCtor, mixinDisabled } from '../../models/disable.model';
 import { IScrollableElement } from '../../models/scrollable-element.model';
 import { ISelectElement } from '../../models/select-element.model';
 import { BrowserService } from '../../services/browser/browser.service';
@@ -19,7 +19,6 @@ let nextUniqueId = 0;
 
 class SimpleOptionBase {}
 
-// tslint:disable-next-line: variable-name
 const _SimpleSelectMixinBase:
     CanDisableCtor &
     typeof SimpleOptionBase = mixinDisabled(SimpleOptionBase);
@@ -148,7 +147,6 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
     this.cdRef.detectChanges();
   }
 
-  // tslint:disable: variable-name
   private _id: string;
   private _highlighted = false;
 
