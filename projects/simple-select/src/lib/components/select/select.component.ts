@@ -8,12 +8,13 @@ import {
     ContentChildren, ElementRef, forwardRef, Input, QueryList, ViewChild, ViewEncapsulation
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+    CanDisable, CanDisableCtor, HasTabIndexCtor, mixinDisabled, mixinTabIndex
+} from '@angular/material/core';
 
 import { Direction } from '../../models/direction.enum';
-import { CanDisable, CanDisableCtor, mixinDisabled } from '../../models/disable.model';
 import { IInteractiveList } from '../../models/interactive-list.model';
 import { IScrollableList } from '../../models/scrollable-list.model';
-import { HasTabIndexCtor, mixinTabIndex } from '../../models/tab-index.model';
 import { BrowserService } from '../../services/browser/browser.service';
 import { DeviceService } from '../../services/device/device.service';
 import { ListKeyManager } from '../a11y/key-manager/list-key-manager';

@@ -5,9 +5,9 @@ import {
     ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, InjectionToken,
     Input, Optional, ViewChild, ViewEncapsulation
 } from '@angular/core';
+import { CanDisableCtor, mixinDisabled } from '@angular/material/core';
 
 import { Direction } from '../../models/direction.enum';
-import { CanDisableCtor, mixinDisabled } from '../../models/disable.model';
 import { IScrollableElement } from '../../models/scrollable-element.model';
 import { ISelectElement } from '../../models/select-element.model';
 import { BrowserService } from '../../services/browser/browser.service';
