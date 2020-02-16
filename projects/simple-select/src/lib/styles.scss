@@ -24,6 +24,18 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
   --simple-select-invalid-color:        #{$simple-select-invalid-color};
 }
 
+@mixin simple-invalid {
+  box-shadow: 0px $simple-select-border-width 5px .1px var(--simple-select-invalid-color);
+}
+
+@mixin simple-disabled {
+  * {
+    background-color: var(--simple-select-disabled-color);
+    opacity: .85;
+    user-select: none;
+  }
+}
+
 .simple-select {
   position: relative;
   display: inline-block;
@@ -217,13 +229,9 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
 }
 
 .simple-disabled {
-  * {
-    background-color: var(--simple-select-disabled-color);
-    opacity: .85;
-    user-select: none;
-  }
+  @include simple-disabled;
 }
 
 .simple-invalid {
-  box-shadow: 0px $simple-select-border-width 5px 1px var(--simple-select-invalid-color);
+  @include simple-invalid;
 }

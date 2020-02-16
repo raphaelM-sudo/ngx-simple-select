@@ -11,8 +11,11 @@ export class ListKeyManager {
 
   private timeoutHandler = null;
   private searchString = '';
+  private numbersOnly = false;
 
-  constructor(private list: IInteractiveList) {}
+  constructor(private list: IInteractiveList) {
+    this.update();
+  }
 
   catchKey(event: KeyboardEvent) {
     const control = event.ctrlKey;
@@ -118,7 +121,8 @@ export class ListKeyManager {
         searchIndex = this.list.highlightedIndex;
       }
 
-      if (this.searchString.length > 0 && (this.searchString !== key)) {
+      // Change search behaviour for lists that only constist of numbers, to be able to search for e.g. 33 by pressing 2 x 3
+      if (this.searchString.length > 0 && (this.searchString !== key || this.numbersOnly)) {
 
         this.searchString += key;
       } else {
@@ -156,5 +160,18 @@ export class ListKeyManager {
   pressedEnter() {
     this.select.next(this.list.highlightedIndex);
     this.blur.next();
+  }
+
+  hasNumbersOnly(): boolean {
+    for (const option of this.list.elements) {
+      if (Number.isNaN(Number(option.text))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  update() {
+    this.numbersOnly = this.hasNumbersOnly();
   }
 }
