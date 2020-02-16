@@ -113,7 +113,7 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
     return '';
   }
 
-  get isRTL() {
+  get isRTL(): boolean {
     return this.dirService.isRTL(this.text);
   }
 
@@ -158,7 +158,7 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
   overflowOffset = 0;
   scrollSideways = false;
 
-  shouldScrollSideways() {
+  shouldScrollSideways(): boolean {
     return this.highlighted && this.hovered && this.scrollSideways;
   }
 

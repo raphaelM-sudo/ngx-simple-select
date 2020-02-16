@@ -381,7 +381,9 @@ IScrollableList, IInteractiveList, AfterViewInit {
     }
 
     this.selectIndex(selectedIndex);
+    this.keyManager.update();
     this.cdRef.markForCheck();
+    this.ngDoCheck();
   }
 
   ngDoCheck() {
