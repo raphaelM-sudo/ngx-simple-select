@@ -83,15 +83,11 @@ $simple-select-arrow-image:             url("data:image/svg+xml,%3C%3Fxml versio
   color: var(--simple-select-placeholder-color);
   top: $simple-select-border-width;
   bottom: -$simple-select-border-width;
-  width: $simple-select-arrow-width;
+  width: #{$simple-select-arrow-width + 2 * $simple-select-padding};
   background-image: $simple-select-arrow-image;
   background-size: $simple-select-arrow-width;
   background-repeat: no-repeat;
-
-  padding-left: $simple-select-padding;
-  padding-right: $simple-select-padding;
-
-  background-position: $simple-select-padding 50%;
+  background-position: 50% 50%;
 
   user-select: none;
 }

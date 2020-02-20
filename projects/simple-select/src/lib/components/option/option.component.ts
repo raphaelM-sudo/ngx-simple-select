@@ -176,6 +176,7 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
   stopFunctionality() {
     this.hovered = false;
     this.cdRef.markForCheck(); // Necessary to display sideway scroll properly
+    this.cdRef.detectChanges(); // Necessary to display scroll sideways properly after blur
   }
 
   calculateScroll() {
@@ -200,7 +201,10 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
         this.scrollSideways = true;
         this.overflowOffset = element.clientWidth - element.scrollWidth;
 
-        this.overflowOffset -= 5; // Hard coded scroll bar width for now
+        this.overflowOffset -= 4; // Just moving it 4px away from the scrollbar, for readability
+        // Update scroll sideways transition
+        this.cdRef.markForCheck();
+        this.cdRef.detectChanges();
 
         if (this.direction === Direction.RightToLeft) {
           this.overflowOffset = -this.overflowOffset;
