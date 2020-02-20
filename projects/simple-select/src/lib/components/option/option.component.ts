@@ -200,7 +200,7 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
         this.scrollSideways = true;
         this.overflowOffset = element.clientWidth - element.scrollWidth;
 
-        this.overflowOffset -= 5; // Hard coded scroll bar width for now
+        this.overflowOffset -= 4; // Just moving it 4px away from the scrollbar, for readability
 
         if (this.direction === Direction.RightToLeft) {
           this.overflowOffset = -this.overflowOffset;
