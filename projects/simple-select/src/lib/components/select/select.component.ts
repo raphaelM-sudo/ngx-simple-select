@@ -5,7 +5,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
     AfterViewInit, Attribute, ChangeDetectionStrategy, ChangeDetectorRef, Component,
-    ContentChildren, ElementRef, Input, Optional, QueryList, Self, ViewChild, ViewEncapsulation, DoCheck
+    ContentChildren, ElementRef, Input, Optional, QueryList, Self, ViewChild, ViewEncapsulation, DoCheck, OnDestroy
 } from '@angular/core';
 import { ControlValueAccessor, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import {
@@ -87,7 +87,7 @@ const _SimpleSelectMixinBase:
 })
 export class SelectComponent extends _SimpleSelectMixinBase
 implements ControlValueAccessor, DoCheck, CanDisable, HasTabIndex, CanUpdateErrorState,
-IScrollableList, IInteractiveList, AfterViewInit {
+IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
   @Input('aria-label') private _ariaLabel?: string;
   @Input() placeholder?: string;
@@ -390,6 +390,12 @@ IScrollableList, IInteractiveList, AfterViewInit {
     if (this.ngControl) {
       this.updateErrorState();
     }
+  }
+
+  ngOnDestroy() {
+    this.destroy.next();
+    this.destroy.complete();
+    this.stateChanges.complete();
   }
 
   constructor(
