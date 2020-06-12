@@ -76,7 +76,6 @@ const _SimpleSelectMixinBase:
     '[attr.aria-invalid]': 'errorState',
     '[attr.aria-activedescendant]': 'activeDescendant',
     '[class.simple-disabled]': 'disabled',
-    '[class.simple-invalid]': 'errorState',
     '[class.simple-required]': 'required',
     '[class.simple-select-mobile-tablet]': 'device.mobileOrTablet',
     '(blur)': 'stopFunctionality()',
