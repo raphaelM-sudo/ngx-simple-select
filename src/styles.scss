@@ -63,10 +63,6 @@ footer {
 .container-content {
   display: block;
   margin: 2.5em 0 2.5em;
-
-  * {
-    margin: 0 auto;
-  }
 }
 
 .browser-info {
@@ -125,4 +121,21 @@ footer {
   box-shadow: 0 1px 2px 2px rgba(190, 190, 190, .5);
   opacity: .85;
   color: #ffffff;
+}
+
+html {
+  box-sizing: content-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/* Custom style for numbers */
+.simple-select-number .simple-select {
+  text-align: center;
+
+  .simple-select-selection, .simple-placeholder-text {
+    justify-content: center;
+  }
 }

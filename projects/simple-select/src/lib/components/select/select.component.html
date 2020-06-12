@@ -1,9 +1,9 @@
-<div [ngClass]="{'simple-select-rtl': direction === Direction.RightToLeft, 'simple-select-ltr': direction === Direction.LeftToRight}">
-  <div [ngClass]="{'simple-select-border': showUI}" class="simple-select-bar" (click)="startFunctionality()" (mouseenter)="mouseenter()" (mouseleave)="mouseleave()">
+<div [ngClass]="{'simple-select-rtl': direction === Direction.RightToLeft, 'simple-select-ltr': direction === Direction.LeftToRight}" class="simple-select-wrapper">
+  <div [ngClass]="{'simple-select-border': showUI, 'simple-invalid': errorState}" class="simple-select-bar" (click)="startFunctionality()" (mouseenter)="mouseenter()" (mouseleave)="mouseleave()">
     <div class="simple-select-box">
       <div *ngIf="!selected; else showSelected" class="simple-placeholder-text">{{placeholder}}</div>
       <ng-template #showSelected>
-        <div [innerHTML]="selected.html | noSanitize"></div>
+        <div [innerHTML]="selected.html | noSanitize" class="simple-select-selection"></div>
       </ng-template>
     </div>
     <div [hidden]="!showUI" [@spin]="{value: animate && showArrowAnimation ? 'rotate' : 'initial', params: {degrees: direction === Direction.RightToLeft ? 180 : -180}}" class="simple-arrow-down"></div>
