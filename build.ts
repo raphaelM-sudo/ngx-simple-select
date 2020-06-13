@@ -7,8 +7,14 @@ import { join } from 'path';
 
 async function main() {
   // cleanup dist
-  del.sync(join(process.cwd(), '/dist'));
-  del.sync(join(process.cwd(), '/node_modules/@nutrify/ngx-simple-select'));
+
+  try {
+    del.sync(join(process.cwd(), '/dist'));
+    del.sync(join(process.cwd(), '/node_modules/@nutrify/ngx-simple-select'));
+  } catch (e) {
+    // tslint:disable-next-line: no-console
+    console.info('Ignoring: Could not delete previous build.');
+  }
 
   await ngPackagr()
     .forProject(join(process.cwd(), 'projects/simple-select/package.json'))
