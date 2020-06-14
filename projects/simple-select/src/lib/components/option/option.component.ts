@@ -34,7 +34,7 @@ const _SimpleSelectMixinBase:
       state('scrolled', style({
         transform: 'translateX({{offset}}px)'
       }), {params: {offset: 0}}),
-      transition('initial => scrolled', [
+      transition('* => scrolled', [
         animate('1500ms 250ms ease-in-out')
       ])
     ]),
