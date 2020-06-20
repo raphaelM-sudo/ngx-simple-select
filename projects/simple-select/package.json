@@ -1,11 +1,12 @@
 {
   "$schema": "../../node_modules/ng-packagr/package.schema.json",
   "name": "@nutrify/ngx-simple-select",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "publishConfig": {
     "access": "public"
   },
   "description": "Simple and lightweight, yet customizable select module for Angular",
+  "author": "Raphael Michl <raphael.michl@protonmail.com>",
   "peerDependencies": {
     "@angular/animations": "^9.0.0-0",
     "@angular/cdk": "^9.0.0-0",
@@ -23,6 +24,10 @@
       "entryFile": "src/public-api.ts"
     },
     "dest": "../../dist/simple-select"
+  },
+  "funding": {
+    "type" : "BuyMeACoffee",
+    "url" : "https://www.buymeacoffee.com/raphaelm"
   },
   "keywords": [
     "angular",
