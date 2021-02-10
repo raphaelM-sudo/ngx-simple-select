@@ -29,6 +29,9 @@
     "type" : "BuyMeACoffee",
     "url" : "https://www.buymeacoffee.com/raphaelm"
   },
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
   "keywords": [
     "angular",
     "select",
