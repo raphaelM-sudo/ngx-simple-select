@@ -19,6 +19,7 @@ let nextUniqueId = 0;
 
 class SimpleOptionBase {}
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const _SimpleSelectMixinBase:
     CanDisableCtor &
     typeof SimpleOptionBase = mixinDisabled(SimpleOptionBase);
@@ -43,7 +44,7 @@ const _SimpleSelectMixinBase:
   inputs: ['disabled'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // tslint:disable-next-line: use-host-property-decorator
+  // eslint-disable-next-line
   host: {
     '[attr.id]': 'id',
     class: 'simple-option',
@@ -51,8 +52,8 @@ const _SimpleSelectMixinBase:
     '[attr.aria-selected]': 'selected.toString()',
     '[attr.aria-disabled]': 'disabled.toString()',
     '[class.simple-disabled]': 'disabled',
-    '[class.simple-option-rtl]': 'direction === Direction.RightToLeft',
-    '[class.simple-option-ltr]': 'direction === Direction.LeftToRight',
+    '[class.simple-option-rtl]': 'direction === Direction.rightToLeft',
+    '[class.simple-option-ltr]': 'direction === Direction.leftToRight',
     '(click)': 'select.next()',
     '(mouseleave)': 'stopFunctionality()',
     '(mousemove)': 'startFunctionality()'
@@ -76,6 +77,7 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
   highlight: Subject<void> = new Subject<void>();
   select: Subject<void> = new Subject<void>();
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   Direction = Direction;
 
   get text(): string {
@@ -127,15 +129,15 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
 
       switch (this.dir) {
         case 'rtl':
-        return Direction.RightToLeft;
+        return Direction.rightToLeft;
         case 'auto':
-        return this.isRTL ? Direction.RightToLeft : Direction.LeftToRight;
+        return this.isRTL ? Direction.rightToLeft : Direction.leftToRight;
         default:
-        return Direction.LeftToRight;
+        return Direction.leftToRight;
       }
     }
 
-    return Direction.Default;
+    return Direction.default;
   }
 
   get highlighted(): boolean {
@@ -147,16 +149,28 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
     this.cdRef.detectChanges();
   }
 
+  selected = false;
+  hovered = false;
+  overflowOffset = 0;
+  scrollSideways = false;
+
   private _id: string;
   private _highlighted = false;
 
   private uid = `simple-option-${++nextUniqueId}`;
   private clientWidth = -1;
 
-  selected = false;
-  hovered = false;
-  overflowOffset = 0;
-  scrollSideways = false;
+  constructor(
+    private cdRef: ChangeDetectorRef,
+    private browser: BrowserService,
+    private dirService: DirectionService,
+    @Optional() @Inject(SELECT_ELEMENT) private parent: ISelectElement) {
+
+    super();
+
+    // Force setter to be called in case id was not specified.
+    this.id = this.id;
+  }
 
   shouldScrollSideways(): boolean {
     return this.highlighted && this.hovered && this.scrollSideways;
@@ -206,7 +220,7 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
         this.cdRef.markForCheck();
         this.cdRef.detectChanges();
 
-        if (this.direction === Direction.RightToLeft) {
+        if (this.direction === Direction.rightToLeft) {
           this.overflowOffset = -this.overflowOffset;
         }
       } else {
@@ -214,17 +228,5 @@ export class OptionComponent extends _SimpleSelectMixinBase implements IScrollab
         this.overflowOffset = 0;
       }
     }
-  }
-
-  constructor(
-    private cdRef: ChangeDetectorRef,
-    private browser: BrowserService,
-    private dirService: DirectionService,
-    @Optional() @Inject(SELECT_ELEMENT) private parent: ISelectElement
-  ) {
-    super();
-
-    // Force setter to be called in case id was not specified.
-    this.id = this.id;
   }
 }

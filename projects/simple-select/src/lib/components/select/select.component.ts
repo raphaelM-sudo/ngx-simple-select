@@ -32,6 +32,7 @@ class SimpleSelectBase {
               public ngControl: NgControl) {}
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const _SimpleSelectMixinBase:
     CanDisableCtor &
     HasTabIndexCtor &
@@ -64,7 +65,7 @@ const _SimpleSelectMixinBase:
       useExisting: SelectComponent
     }
   ],
-  // tslint:disable-next-line: use-host-property-decorator
+  // eslint-disable-next-line
   host: {
     '[attr.id]': 'id',
     '[attr.tabindex]': 'tabIndex',
@@ -88,13 +89,10 @@ export class SelectComponent extends _SimpleSelectMixinBase
 implements ControlValueAccessor, DoCheck, CanDisable, HasTabIndex, CanUpdateErrorState,
 IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
-  @Input('aria-label') private _ariaLabel?: string;
   @Input() placeholder?: string;
-  @Input() hoverBorder = false;
-  @Input() animate = true;
-  @Input() value: object | string | number;
   @Input() dir?: 'ltr' | 'rtl' | 'auto';
   @Input() errorStateMatcher: ErrorStateMatcher;
+  @Input('aria-label') private _ariaLabel?: string;
 
   @Input()
   get id(): string { return this._id; }
@@ -103,13 +101,31 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
   }
 
   @Input()
+  get value(): object | string | number { return this._value; }
+  set value(value: object | string | number) {
+    this.writeValue(value);
+  }
+
+  @Input()
+  get hoverBorder(): boolean { return this._hoverBorder; }
+  set hoverBorder(hoverBorder: boolean) {
+    this._hoverBorder = coerceBooleanProperty(hoverBorder);
+  }
+
+  @Input()
+  get animate(): boolean { return this._animate; }
+  set animate(animateVal: boolean) {
+    this._animate = coerceBooleanProperty(animateVal);
+  }
+
+  @Input()
   get required(): boolean { return this._required; }
-  set required(value: boolean) {
-    this._required = coerceBooleanProperty(value);
+  set required(required: boolean) {
+    this._required = coerceBooleanProperty(required);
   }
 
   get showUI() {
-    return !this.hoverBorder || this.focus || this.mouseOver;
+    return !this.hoverBorder || this.focus || this.mouseOver || this.disabled;
   }
 
   get showArrowAnimation() {
@@ -134,22 +150,22 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
           for (const option of this.elements) {
             if (option.isRTL) {
-              return Direction.RightToLeft;
+              return Direction.rightToLeft;
             }
           }
 
-          return Direction.LeftToRight;
+          return Direction.leftToRight;
         }
       }
     }
 
     if (this.dir === 'rtl') {
-      return Direction.RightToLeft;
+      return Direction.rightToLeft;
     } else if (this.dir === 'ltr') {
-      return Direction.LeftToRight;
+      return Direction.leftToRight;
     }
 
-    return Direction.Default;
+    return Direction.default;
   }
 
   get ariaLabel(): string | null {
@@ -171,19 +187,13 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
     this._elements = options;
   }
 
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   @ViewChild('optionList', { static: true }) list: ElementRef;
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   @ContentChildren(OptionComponent, {descendants: true}) options: QueryList<OptionComponent>;
 
-  private _id: string;
-  private _required = false;
-  private _elements: OptionComponent[] = [];
-  private optionSubscriptions: Subscription[] = [];
-
-  private uid = `simple-select-${++nextUniqueId}`;
-  // Emits whenever the component is destroyed
-  private readonly destroy = new Subject<void>();
-
   // Enum for usage in template
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   Direction = Direction;
 
   focus = false;
@@ -193,6 +203,57 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
   scrollManager: ListScrollManager;
   keyManager: ListKeyManager;
+
+  private _id: string;
+  private _value: object | string | number;
+  private _hoverBorder = false;
+  private _animate = true;
+  private _required = false;
+  private _elements: OptionComponent[] = [];
+  private optionSubscriptions: Subscription[] = [];
+
+  private uid = `simple-select-${++nextUniqueId}`;
+  // Emits whenever the component is destroyed
+  private readonly destroy = new Subject<void>();
+
+  constructor(
+    private cdRef: ChangeDetectorRef,
+    private browser: BrowserService,
+    public device: DeviceService,
+    elementRef: ElementRef,
+    _defaultErrorStateMatcher: ErrorStateMatcher,
+    @Optional() _parentForm: NgForm,
+    @Optional() _parentFormGroup: FormGroupDirective,
+    @Self() @Optional() public ngControl: NgControl,
+    @Attribute('tabindex') tabIndex: string) {
+
+    super(elementRef, _defaultErrorStateMatcher, _parentForm,
+          _parentFormGroup, ngControl);
+
+    if (this.ngControl) {
+      // Note: we provide the value accessor through here, instead of
+      // the `providers` to avoid running into a circular import.
+      this.ngControl.valueAccessor = this;
+    }
+
+    this.scrollManager = new ListScrollManager(this);
+    this.keyManager = new ListKeyManager(this);
+
+    this.keyManager.blur.pipe(takeUntil(this.destroy)).subscribe(() => {
+      this.blur();
+    });
+
+    this.keyManager.select.pipe(takeUntil(this.destroy)).subscribe((index: number) => {
+      this.selectIndex(index);
+      this.emit();
+      this.scrollManager.correctScroll(this.highlightedIndex);
+    });
+
+    this.tabIndex = parseInt(tabIndex, 10) || 0;
+
+    // Force setter to be called in case id was not specified.
+    this.id = this.id;
+  }
 
   skipPredicateFn = (item: OptionComponent) => item.disabled;
   propagateChange = (_: any) => {};
@@ -317,17 +378,17 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
   emit() {
     if (this.selectedIndex >= 0 && this.selectedIndex < this.elements.length) {
-      this.value = this.elements[this.selectedIndex].value;
+      this._value = this.elements[this.selectedIndex].value;
     } else {
-      this.value = null;
+      this._value = null;
     }
 
-    this.propagateChange(this.value);
+    this.propagateChange(this._value);
   }
 
   writeValue(value: any): void {
     if (value !== null) {
-      this.value = value;
+      this._value = value;
 
       if (this._elementRef) {
         for (let i = 0; i < this.elements.length; i++) {
@@ -373,7 +434,7 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
     // Select option based on previously selected value
     for (let i = 0; i < this.elements.length; i++) {
-      if (this.elements[i].value === this.value) {
+      if (this.elements[i].value === this._value) {
         selectedIndex = i;
         break;
       }
@@ -395,44 +456,5 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
     this.destroy.next();
     this.destroy.complete();
     this.stateChanges.complete();
-  }
-
-  constructor(
-    private cdRef: ChangeDetectorRef,
-    private browser: BrowserService,
-    public device: DeviceService,
-    elementRef: ElementRef,
-    _defaultErrorStateMatcher: ErrorStateMatcher,
-    @Optional() _parentForm: NgForm,
-    @Optional() _parentFormGroup: FormGroupDirective,
-    @Self() @Optional() public ngControl: NgControl,
-    @Attribute('tabindex') tabIndex: string) {
-
-    super(elementRef, _defaultErrorStateMatcher, _parentForm,
-          _parentFormGroup, ngControl);
-
-    if (this.ngControl) {
-      // Note: we provide the value accessor through here, instead of
-      // the `providers` to avoid running into a circular import.
-      this.ngControl.valueAccessor = this;
-    }
-
-    this.scrollManager = new ListScrollManager(this);
-    this.keyManager = new ListKeyManager(this);
-
-    this.keyManager.blur.pipe(takeUntil(this.destroy)).subscribe(() => {
-      this.blur();
-    });
-
-    this.keyManager.select.pipe(takeUntil(this.destroy)).subscribe((index: number) => {
-      this.selectIndex(index);
-      this.emit();
-      this.scrollManager.correctScroll(this.highlightedIndex);
-    });
-
-    this.tabIndex = parseInt(tabIndex, 10) || 0;
-
-    // Force setter to be called in case id was not specified.
-    this.id = this.id;
   }
 }
