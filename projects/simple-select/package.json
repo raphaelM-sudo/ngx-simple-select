@@ -1,7 +1,6 @@
 {
-  "$schema": "../../node_modules/ng-packagr/package.schema.json",
   "name": "@nutrify/ngx-simple-select",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "publishConfig": {
     "access": "public"
   },

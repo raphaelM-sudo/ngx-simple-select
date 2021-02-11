@@ -90,10 +90,6 @@ implements ControlValueAccessor, DoCheck, CanDisable, HasTabIndex, CanUpdateErro
 IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
   @Input() placeholder?: string;
-  @Input() hoverBorder = false;
-  @Input() animate = true;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  @Input() value: object | string | number;
   @Input() dir?: 'ltr' | 'rtl' | 'auto';
   @Input() errorStateMatcher: ErrorStateMatcher;
   @Input('aria-label') private _ariaLabel?: string;
@@ -105,13 +101,31 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
   }
 
   @Input()
+  get value(): object | string | number { return this._value; }
+  set value(value: object | string | number) {
+    this.writeValue(value);
+  }
+
+  @Input()
+  get hoverBorder(): boolean { return this._hoverBorder; }
+  set hoverBorder(hoverBorder: boolean) {
+    this._hoverBorder = coerceBooleanProperty(hoverBorder);
+  }
+
+  @Input()
+  get animate(): boolean { return this._animate; }
+  set animate(animateVal: boolean) {
+    this._animate = coerceBooleanProperty(animateVal);
+  }
+
+  @Input()
   get required(): boolean { return this._required; }
-  set required(value: boolean) {
-    this._required = coerceBooleanProperty(value);
+  set required(required: boolean) {
+    this._required = coerceBooleanProperty(required);
   }
 
   get showUI() {
-    return !this.hoverBorder || this.focus || this.mouseOver;
+    return !this.hoverBorder || this.focus || this.mouseOver || this.disabled;
   }
 
   get showArrowAnimation() {
@@ -191,6 +205,9 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
   keyManager: ListKeyManager;
 
   private _id: string;
+  private _value: object | string | number;
+  private _hoverBorder = false;
+  private _animate = true;
   private _required = false;
   private _elements: OptionComponent[] = [];
   private optionSubscriptions: Subscription[] = [];
@@ -361,17 +378,17 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
   emit() {
     if (this.selectedIndex >= 0 && this.selectedIndex < this.elements.length) {
-      this.value = this.elements[this.selectedIndex].value;
+      this._value = this.elements[this.selectedIndex].value;
     } else {
-      this.value = null;
+      this._value = null;
     }
 
-    this.propagateChange(this.value);
+    this.propagateChange(this._value);
   }
 
   writeValue(value: any): void {
     if (value !== null) {
-      this.value = value;
+      this._value = value;
 
       if (this._elementRef) {
         for (let i = 0; i < this.elements.length; i++) {
@@ -417,7 +434,7 @@ IScrollableList, IInteractiveList, AfterViewInit, OnDestroy {
 
     // Select option based on previously selected value
     for (let i = 0; i < this.elements.length; i++) {
-      if (this.elements[i].value === this.value) {
+      if (this.elements[i].value === this._value) {
         selectedIndex = i;
         break;
       }
